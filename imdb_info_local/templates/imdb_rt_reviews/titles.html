@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title_type }}</title>
+    <style>
+
+        nav ul {
+            margin-left: auto;
+            {#width: 60%;#}
+            display: flex;
+            justify-content: right;
+            {#border: dotted 2px green;#}
+            {#margin-left: auto;#}
+            {#margin-right: 0;#}
+        }
+        nav li {
+            {#border-bottom: dotted 2px blueviolet;#}
+            list-style: none;
+            flex: 0 1 auto;
+
+            {#margin: .5rem 1rem;#}
+        }
+        nav a {
+            text-decoration: none;
+        }
+        nav a:link, nav a:visited, nav a:focus {
+            {#flex: 1 1 auto;#}
+            display: inline-block;
+            color: white;
+            background: darkseagreen;
+            font-size: 2rem;
+            {#width: 200px;#}
+            line-height: 2;
+            text-align: center;
+            {#border: solid 1px blueviolet;#}
+            margin-right: 5px;
+            padding: 0 10px;
+            {#background: lightseagreen;#}
+        }
+        nav a:hover {
+            background: lightseagreen;
+        }
+        a:link {
+            color: darkgreen;
+        }
+        a:visited {
+            color: darkcyan;
+        }
+        h1 {
+            text-align: center;
+        }
+        .title-list li {
+            list-style: none;
+            border-top: solid 1px darkgreen;
+        }
+        .main-content {
+            display: flex;
+        }
+        .title-rating {
+            flex: 0 0 auto;
+            font-size: 1.5rem;
+            margin-right: 16px;
+        }
+        .blurb {
+            flex: 1 1 auto;
+            border-left: dotted 2px green;
+            padding: 0 8px;
+        }
+        .title-find-results li {
+            border-top: none;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <ul>
+            <li><a href="{% url 'movie_list' %}">Movies</a></li>
+            <li><a href="{% url 'tv_list' %}">TV</a></li>
+            <li><a href="{% url 'movie_mtime' %}">Movies mtime</a></li>
+            <li><a href="{% url 'tv_mtime' %}">TV mtime</a></li>
+        </ul>
+    </nav>
+</header>
+    <h1>{{ title_type }}</h1>
+    <ul class="title-list">{% for title in title_list %}
+        <li>
+        <div class="main-content">
+            <div class="title-rating">
+                <p>{{ title.rating }} - {{ title.title }}</p>
+            </div>
+            <div class="blurb">
+                <p>{{ title.blurb|safe }}</p>
+            </div>
+        </div>
+        <div class="title-url hidden">
+            <p>title url: <a href="{{ title.imdb_title_url }}">{{ title.imdb_title_url }}</a></p>
+        </div>
+        <div class="title-find-results hidden">
+            All results from title search:
+            {{ title.find_results|safe }}
+        </div>
+
+        </li>
+        {% endfor %}
+    </ul>
+<script>
+    {#  Click on the ratings/title div to expose the links to all titles in search #}
+    titleDivs = document.getElementsByClassName('title-rating');
+    console.log('titleDivs: ' + titleDivs.length);
+    for (let i=0; i<titleDivs.length; i++) {
+        titleDivs[i].addEventListener('click', function(e){
+            let mainContent = e.target.closest('.main-content');
+            let findResults = mainContent.nextElementSibling.nextElementSibling;
+            findResults.classList.toggle('hidden');
+        });
+    }
+</script>
+</body>
+</html>

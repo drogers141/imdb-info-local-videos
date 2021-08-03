@@ -1,0 +1,66 @@
+import re
+
+import requests
+from bs4 import BeautifulSoup
+
+
+class IMDBFindTitleResult:
+    def __init__(self, img_url: str, title_url: str, text: str):
+        self.img_url = img_url
+        self.title_url = title_url
+        self.text = text
+
+    def __str__(self):
+        return self.text
+
+
+def imdb_title_search_results(title: str) -> [IMDBFindTitleResult]:
+    """Searches for a title.
+
+    Uses IMDB's search page to query for title and scrapes the results page.
+    Returns list of candidates in order.
+    :return [IMDBFindTitleResult]
+    """
+    name_query = title.replace(' ', '+')
+    url = f'https://www.imdb.com/find?q={name_query}'
+    r = requests.get(url)
+    soup = BeautifulSoup(r.content, 'html.parser')
+    results_table = soup.find('table', class_='findList')
+    titles = []
+    if results_table:
+        for tr in results_table.find_all('tr'):
+            img_url = tr.td.img['src']
+            relative_url = tr.find_all('td')[1].a['href']
+            title_url = f'https://www.imdb.com/{relative_url}'
+            text = tr.find_all('td')[1].text.strip()
+            titles.append(IMDBFindTitleResult(img_url, title_url, text))
+    return titles
+
+
+class IMDBTitleData:
+    def __init__(self, rating: str, blurb: str):
+        self.rating = rating
+        self.blurb = blurb
+
+    def __str__(self):
+        return f'{self.rating}\n{self.blurb}'
+
+
+def imdb_title_data(title_url: str) -> IMDBTitleData:
+    """Scrapes IMDB page for rating and title info.
+
+    :param - title_url - url of IMDB's page for the title.
+    :return IMDBTitleData - ie - rating and blurb (summary)
+    """
+    r = requests.get(title_url)
+    soup = BeautifulSoup(r.content, 'html.parser')
+    ratings_div = soup.find('div', class_=re.compile('^AggregateRatingButton__Rating.*'))
+    rating = ratings_div.text if ratings_div else 'N/A'
+    plot_p = soup.find('span', class_=re.compile('^GenresAndPlot__TextContainerBreakpointXL.*'))
+    if plot_p and plot_p.text:
+        blurb = plot_p.text
+    else:
+        blurb = f'No blurb for title_url: <a href="{title_url}">{title_url}</a>'
+    if not blurb:
+        print(f'no blurb: title_url: {title_url}\n')
+    return IMDBTitleData(rating, blurb)

@@ -1,0 +1,10 @@
+drogers=# create database imdb_info_local;
+CREATE DATABASE
+drogers=# create user imdb_info_local_user with password 'imdb_info_local_pass123';
+CREATE ROLE
+drogers=# grant all privileges on database imdb_info_local to imdb_info_local_user;
+GRANT
+
+# allow testing
+drogers=# alter user imdb_info_local_user createdb;
+ALTER ROLE
