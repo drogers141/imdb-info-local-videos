@@ -1,9 +1,11 @@
 import re
 from dataclasses import dataclass
+import logging
 
 import requests
 from bs4 import BeautifulSoup
 
+logger = logging.getLogger(__name__)
 
 def parse_html_for_url(url):
     r = requests.get(url)
@@ -66,5 +68,5 @@ def imdb_title_data(title_url: str) -> IMDBTitleData:
     else:
         blurb = f'No blurb for title_url: <a href="{title_url}">{title_url}</a>'
     if not blurb:
-        print(f'no blurb: title_url: {title_url}\n')
+        logger.info(f'no blurb: title_url: {title_url}\n')
     return IMDBTitleData(rating, blurb)

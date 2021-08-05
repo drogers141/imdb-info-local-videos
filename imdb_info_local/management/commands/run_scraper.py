@@ -10,7 +10,7 @@ from imdb_info_local.models import IMDBTitleSearchData
 from imdb_info_local.imdb import (imdb_title_search_results, imdb_title_data,
                                   IMDBTitleData, IMDBFindTitleResult)
 
-# logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class IMDBTitleSearchResults:
@@ -83,7 +83,7 @@ def remove_title_data_for_deleted_files(directory: Path, type: str='movie') -> [
 
     for titleData in IMDBTitleSearchData.objects.filter(type=title_type):
         if titleData.title not in video_titles:
-            print(f'titleData {titleData} not in directory: {directory} - removing')
+            logger.debug(f'titleData {titleData} not in directory: {directory} - removing')
             removed.append(titleData.title)
             titleData.delete()
 
@@ -126,17 +126,17 @@ def process_directory(directory: Path, type: str = 'movie'):
     added = []
     for subdir in directory.glob('*'):
         try:
-            print(f'processing: {subdir}')
+            logger.debug(f'processing: {subdir}')
             path = subdir.as_posix()
             type_ = IMDBTitleSearchData.TV if type == 'tv' else IMDBTitleSearchData.MOVIE
             mtime = int(subdir.stat().st_mtime)
             ctime = int(subdir.stat().st_ctime)
-            print(f'path: {path}\nmtime: {mtime}, ctime: {ctime}')
+            logger.debug(f'path: {path}\nmtime: {mtime}, ctime: {ctime}')
             title = subdir.name.replace('-', ' ')
 
             if not IMDBTitleSearchData.objects.filter(title=title, type=type_):
                 title_search_results = get_imdb_title_data(title)
-                print(f'title data: {title_search_results}')
+                logger.debug(f'title data: {title_search_results}')
                 IMDBTitleSearchData.objects.create(
                     title=title,
                     type=type_,
@@ -150,9 +150,9 @@ def process_directory(directory: Path, type: str = 'movie'):
                 added.append(title)
                 time.sleep(1)
             else:
-                print(f'title of same type exists: {title} type: {type_}')
+                logger.debug(f'title of same type exists: {title} type: {type_}')
         except Exception as e:
-            print(f'Exception handling dir: {subdir}')
+            logger.error(f'Exception handling dir: {subdir}')
             raise
     return added
 
@@ -169,12 +169,12 @@ class Command(BaseCommand):
         added_tv = process_directory(Path(settings.TV_DIRECTORY), 'tv')
 
         if removed_movies:
-            print(f'Removed movies: {removed_movies}')
+            logger.info(f'Removed movies: {removed_movies}')
         if removed_tv:
-            print(f'Removed tv: {removed_tv}')
+            logger.info(f'Removed tv: {removed_tv}')
         if added_movies:
-            print(f'Added movies: {added_movies}')
+            logger.info(f'Added movies: {added_movies}')
         if added_tv:
-            print(f'Added tv: {added_tv}')
+            logger.info(f'Added tv: {added_tv}')
         if not removed_movies or removed_tv or added_movies or added_tv:
-            print('No movie or tv titles added or removed')
+            logger.info('No movie or tv titles added or removed')
