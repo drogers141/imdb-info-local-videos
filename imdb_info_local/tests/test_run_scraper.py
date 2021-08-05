@@ -82,11 +82,14 @@ class RunScraperTests(TestCase):
             file_ctime=1604372147
         )
 
+    def setUp(self):
+        self.tv_dir = DATA_DIR.joinpath('tv')
+        self.tv_dir.mkdir()
+
     def tearDown(self):
-        tv_dir = DATA_DIR.joinpath('tv')
+        if self.tv_dir.is_dir():
+            rmtree(self.tv_dir)
         movie_dir = DATA_DIR.joinpath('movies')
-        if tv_dir.is_dir():
-            rmtree(tv_dir)
         if movie_dir.is_dir():
             rmtree(movie_dir)
 
@@ -97,11 +100,9 @@ class RunScraperTests(TestCase):
         # this is enforced easily by adding the year to the title which we expect
         # but is not necessary
         # note this is overkill - as the year is expected, but what the hell
-        tv_dir = DATA_DIR.joinpath('tv')
-        tv_dir.mkdir()
-        archer_dir = tv_dir.joinpath('Archer')
+        archer_dir = self.tv_dir.joinpath('Archer')
         archer_dir.mkdir()
-        process_directory(tv_dir, 'tv')
+        process_directory(self.tv_dir, 'tv')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 1)
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer')[0], self.archer)
 
@@ -115,12 +116,10 @@ class RunScraperTests(TestCase):
                 blurb='A comedy series adapted from the award-winning play about a young woman trying to cope with life in London whilst coming to terms with a recent tragedy.'
             )
         )
-        tv_dir = DATA_DIR.joinpath('tv')
-        tv_dir.mkdir()
-        fleabag_dir = tv_dir.joinpath('Fleabag')
+        fleabag_dir = self.tv_dir.joinpath('Fleabag')
         fleabag_dir.mkdir()
 
-        process_directory(tv_dir, 'tv')
+        process_directory(self.tv_dir, 'tv')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 2)
         fleabag = IMDBTitleSearchData.objects.get(title='Fleabag')
         self.assertEqual(fleabag.title, 'Fleabag')
@@ -155,21 +154,17 @@ class RunScraperTests(TestCase):
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer', type='MO').count(), 1)
 
     def test_remove_title_data_for_deleted_files_no_removal_needed(self):
-        tv_dir = DATA_DIR.joinpath('tv')
-        tv_dir.mkdir()
-        archer_dir = tv_dir.joinpath('Archer')
+        archer_dir = self.tv_dir.joinpath('Archer')
         archer_dir.mkdir()
-        fleabag_dir = tv_dir.joinpath('Fleabag')
+        fleabag_dir = self.tv_dir.joinpath('Fleabag')
         fleabag_dir.mkdir()
         # print(f"before delete check: {[t.title for t in IMDBTitleSearchData.objects.all()]}")
-        remove_title_data_for_deleted_files(tv_dir, 'tv')
+        remove_title_data_for_deleted_files(self.tv_dir, 'tv')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 1)
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer', type='TV').count(), 1)
 
     def test_remove_title_data_for_deleted_files_removal_needed(self):
-        tv_dir = DATA_DIR.joinpath('tv')
-        tv_dir.mkdir()
-        fleabag_dir = tv_dir.joinpath('Fleabag')
+        fleabag_dir = self.tv_dir.joinpath('Fleabag')
         fleabag_dir.mkdir()
-        remove_title_data_for_deleted_files(tv_dir, 'tv')
+        remove_title_data_for_deleted_files(self.tv_dir, 'tv')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 0)

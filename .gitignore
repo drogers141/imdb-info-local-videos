@@ -2,4 +2,4 @@ db.sqlite3
 *.iml 
 .idea/
 temp/
-
+ipython_log*
