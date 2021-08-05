@@ -1,0 +1,80 @@
+# IMdb Info for Local Videos
+
+This is a website meant to work on a local machine where you have movies and tv series on disk and want
+ratings and summaries available for them.
+
+It is probably just for me.  So I'm writing this to remember it a bit.
+
+## Requirements
+
+The site assumes that there is one directory containing movie videos, and one directory containing tv 
+series.  Within each directory each title must have its video or series of videos in a directory with
+the title in title capitalization with dashes delimiting each word.  It is recommended that the title
+ends with the year as shown in IMdb as it will help that the algorithm picks the right title.
+```
+/path/to/movies/Black-Widow-2021
+/path/to/movies/Blade-Runner-1982
+/path/to/movies/Blade-Runner-2049-2017
+...
+/path/to/tv/Archer
+/path/to/tv/Dead-Pixels-2019
+/path/to/tv/Fleabag
+```
+
+## Setup
+This is a Django application, so config is in a settings.py file.  In this case it is:
+```
+config/settings.py
+```
+Set the tv and movie directory variables to your needs:
+```
+# Directories where tv and movie files are located
+TV_DIRECTORY = '/Volumes/dr-wd-2/tv'
+MOVIE_DIRECTORY = '/Volumes/dr-wd-2/movies'
+
+```
+
+For now this is not dockerized, so a postgresql database needs to be installed and you must have access 
+to a psql shell as a superuser.  To create the database follow instructions in:
+```
+create_db
+```
+You can also change the database settings in the settings.py of course if you know how.
+
+Initiate a python virtual environment and install the dependencies:
+```
+# install pipenv in your system (see pipenv docs)
+pip install pipenv
+or 
+pip install --user pipenv
+
+# create virtual environment and install deps
+pipenv install 
+```
+
+## Running
+As well there are no bin scripts yet, so to run the scraping and inserting of objects into the db cd to the
+root directory and run:
+```
+pipenv run python manage.py run_scraper
+```
+Run that anytime video titles are added or removed.
+
+Run the website:
+```
+pipenv python manage.py runserver [port]
+```
+
+Website will be at http://localhost:8000/movies/ or different port as specified.
+
+The frontend is still being worked on.
+
+Navigation at the top right of the page shows pages available:
+
+- Movies - movies ordered alphabetically
+- TV - tv series ordered alphabetically
+- Movies mtime - movies ordered by most recently added (file mtime of the directory holding the movie)
+- TV mtime - tv series ordered by most recently added
+
+if you click the ratings/title area for a title, the list of titles
+found in the title search will be shown in case the wrong title was picked.
