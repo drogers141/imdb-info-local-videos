@@ -97,9 +97,6 @@
                 <p>{{ title.blurb|safe }}</p>
             </div>
         </div>
-        <div class="title-url hidden">
-            <p>title url: <a href="{{ title.imdb_title_url }}">{{ title.imdb_title_url }}</a></p>
-        </div>
         <div class="title-find-results hidden">
             All results from title search:
             {{ title.find_results|safe }}
@@ -115,7 +112,7 @@
     for (let i=0; i<titleDivs.length; i++) {
         titleDivs[i].addEventListener('click', function(e){
             let mainContent = e.target.closest('.main-content');
-            let findResults = mainContent.nextElementSibling.nextElementSibling;
+            let findResults = mainContent.nextElementSibling;
             findResults.classList.toggle('hidden');
         });
     }

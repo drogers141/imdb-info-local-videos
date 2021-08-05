@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone, dateparse
 
-from imdb_rt_reviews.models import IMDBTitleSearchData
+from imdb_info_local.models import IMDBTitleSearchData
 
 
 class Command(BaseCommand):

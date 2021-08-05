@@ -14,9 +14,10 @@ from imdb_info_local.imdb import (imdb_title_search_results, imdb_title_data,
 
 
 class IMDBTitleSearchResults:
-    def __init__(self, title: str, title_url: str, find_results: [IMDBFindTitleResult], title_data: IMDBTitleData):
+    def __init__(self, title: str,
+                 find_results: [IMDBFindTitleResult],
+                 title_data: IMDBTitleData):
         self.title = title
-        self.title_url = title_url
         self.find_results = find_results
         self.title_data = title_data
 
@@ -35,17 +36,17 @@ def get_imdb_title_data(title: str) -> IMDBTitleSearchResults:
 
     The find results from step 2 are saved so they can be presented to the
     user in case the wrong title is picked.
+
     :return IMDBTitleSearchResults
     """
     search_results = imdb_title_search_results(title)
     if search_results:
         target = search_results[0]
         title_data = imdb_title_data(target.title_url)
-        return IMDBTitleSearchResults(title, target.title_url, search_results, title_data)
+        return IMDBTitleSearchResults(title, search_results, title_data)
     else:
         return IMDBTitleSearchResults(
             title=title,
-            title_url='https://imdb.com',
             find_results=search_results,
             title_data= IMDBTitleData('N/A', 'No titles found in search')
         )
@@ -66,9 +67,9 @@ def remove_title_data_for_deleted_files(directory: Path, type: str='movie'):
     :param type - 'movie', or 'tv'
     """
     video_title_dirs = directory.glob('*')
-    video_titles = [t.as_posix().replace('-', ' ') for t in video_title_dirs]
-    print(f"video title dirs:\n{video_title_dirs}")
-    print(f"video titles:\n{video_titles}")
+    video_titles = [t.name.replace('-', ' ') for t in video_title_dirs]
+    # print(f"video title dirs:\n{[v for v in video_title_dirs]}")
+    # print(f"video titles:\n{video_titles}")
 
     title_type = None
     if type == 'movie':
@@ -120,7 +121,7 @@ def process_directory(directory: Path, type: str = 'movie'):
             print(f'path: {path}\nmtime: {mtime}, ctime: {ctime}')
             title = subdir.name.replace('-', ' ')
 
-            if not IMDBTitleSearchData.objects.filter(title=title):
+            if not IMDBTitleSearchData.objects.filter(title=title, type=type_):
                 title_search_results = get_imdb_title_data(title)
                 print(f'title data: {title_search_results}')
                 IMDBTitleSearchData.objects.create(
@@ -128,7 +129,6 @@ def process_directory(directory: Path, type: str = 'movie'):
                     type=type_,
                     rating=title_search_results.title_data.rating,
                     blurb=title_search_results.title_data.blurb,
-                    imdb_title_url=title_search_results.title_url,
                     find_results=find_results_html(title_search_results.find_results),
                     file_path=path,
                     file_mtime=mtime,
@@ -136,7 +136,7 @@ def process_directory(directory: Path, type: str = 'movie'):
                 )
                 time.sleep(1)
             else:
-                print(f'title exists: {title}')
+                print(f'title of same type exists: {title} type: {type_}')
         except Exception as e:
             print(f'Exception handling dir: {subdir}')
             raise
@@ -147,11 +147,9 @@ class Command(BaseCommand):
     Then store as models."""
 
     def handle(self, *args, **options):
-        _time = timezone.now().strftime("%Y-%m-%d %X %Z")
-        self.stdout.write("Django time: {}".format(_time))
+        remove_title_data_for_deleted_files(Path(settings.MOVIE_DIRECTORY), 'movie')
+        remove_title_data_for_deleted_files(Path(settings.MOVIE_DIRECTORY), 'tv')
 
         process_directory(Path(settings.MOVIE_DIRECTORY), 'movie')
         process_directory(Path(settings.TV_DIRECTORY), 'tv')
-
-        # remove_title_data_for_deleted_files(Path(settings.MOVIE_DIRECTORY), 'movie')
 

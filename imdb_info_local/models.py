@@ -15,9 +15,6 @@ class IMDBTitleSearchData(models.Model):
     title - as described above
     rating - imdb rating string - e.g. '7.5/10' - may be empty
     blurb - descriptive blurb about the title - may be empty
-    imdb_title_url - url that was selected from the title search
-        - this is saved to check if the title doesn't seem right
-        - it is also available as the first url in find_results
     find_results - this is the list returned from the title search, saved as
         html (an unordered list).  This is kept in case the title
         retrieved is not correct, so this can be shown to the user to select a
@@ -35,7 +32,6 @@ class IMDBTitleSearchData(models.Model):
     title = models.CharField(max_length=512)
     rating = models.CharField(max_length=32)
     blurb = models.TextField()
-    imdb_title_url = models.CharField(max_length=256)
     find_results = models.TextField()
     file_path = models.CharField(max_length=512)
     file_mtime = models.BigIntegerField()

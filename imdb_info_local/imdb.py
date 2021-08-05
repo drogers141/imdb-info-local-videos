@@ -1,14 +1,20 @@
 import re
+from dataclasses import dataclass
 
 import requests
 from bs4 import BeautifulSoup
 
 
+def parse_html_for_url(url):
+    r = requests.get(url)
+    soup = BeautifulSoup(r.content, 'html.parser')
+    return soup
+
+@dataclass
 class IMDBFindTitleResult:
-    def __init__(self, img_url: str, title_url: str, text: str):
-        self.img_url = img_url
-        self.title_url = title_url
-        self.text = text
+    img_url: str
+    title_url: str
+    text: str
 
     def __str__(self):
         return self.text
@@ -23,24 +29,23 @@ def imdb_title_search_results(title: str) -> [IMDBFindTitleResult]:
     """
     name_query = title.replace(' ', '+')
     url = f'https://www.imdb.com/find?q={name_query}'
-    r = requests.get(url)
-    soup = BeautifulSoup(r.content, 'html.parser')
+    soup = parse_html_for_url(url)
     results_table = soup.find('table', class_='findList')
     titles = []
     if results_table:
         for tr in results_table.find_all('tr'):
             img_url = tr.td.img['src']
             relative_url = tr.find_all('td')[1].a['href']
-            title_url = f'https://www.imdb.com/{relative_url}'
+            title_url = f'https://www.imdb.com{relative_url}'
             text = tr.find_all('td')[1].text.strip()
             titles.append(IMDBFindTitleResult(img_url, title_url, text))
     return titles
 
 
+@dataclass
 class IMDBTitleData:
-    def __init__(self, rating: str, blurb: str):
-        self.rating = rating
-        self.blurb = blurb
+    rating: str
+    blurb: str
 
     def __str__(self):
         return f'{self.rating}\n{self.blurb}'
@@ -52,8 +57,7 @@ def imdb_title_data(title_url: str) -> IMDBTitleData:
     :param - title_url - url of IMDB's page for the title.
     :return IMDBTitleData - ie - rating and blurb (summary)
     """
-    r = requests.get(title_url)
-    soup = BeautifulSoup(r.content, 'html.parser')
+    soup = parse_html_for_url(title_url)
     ratings_div = soup.find('div', class_=re.compile('^AggregateRatingButton__Rating.*'))
     rating = ratings_div.text if ratings_div else 'N/A'
     plot_p = soup.find('span', class_=re.compile('^GenresAndPlot__TextContainerBreakpointXL.*'))
