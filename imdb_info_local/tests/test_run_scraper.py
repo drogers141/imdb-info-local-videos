@@ -1,9 +1,10 @@
 from pathlib import Path
 from shutil import rmtree
-from unittest.mock import patch
+from unittest.mock import patch, call
 
 from django.test import TestCase, SimpleTestCase
 from django.core.management import call_command
+from django.conf import settings
 
 from imdb_info_local.imdb import IMDBTitleData, IMDBFindTitleResult
 from imdb_info_local.models import IMDBTitleSearchData
@@ -58,8 +59,12 @@ class RunScraperNoDBTests(SimpleTestCase):
     def test_command_call(self, process_directory_mock, remove_deleted_files_mock):
         """Ensure the commmand works"""
         call_command('run_scraper')
-        self.assertEqual(remove_deleted_files_mock.call_count, 2)
-        self.assertEqual(process_directory_mock.call_count, 2)
+        self.assertSequenceEqual(remove_deleted_files_mock.call_args_list,
+                         [call(Path(settings.MOVIE_DIRECTORY), 'movie'),
+                          call(Path(settings.TV_DIRECTORY), 'tv'),])
+        self.assertSequenceEqual(process_directory_mock.call_args_list,
+                         [call(Path(settings.MOVIE_DIRECTORY), 'movie'),
+                          call(Path(settings.TV_DIRECTORY), 'tv'),])
 
 
 fleabag_search_results = [IMDBFindTitleResult(img_url='https://m.media-amazon.com/images/M/MV5BMjA4MzU5NzQxNV5BMl5BanBnXkFtZTgwOTg3MDA5NzM@._V1_UX32_CR0,0,32,44_AL_.jpg', title_url='https://www.imdb.com/title/tt5687612/', text='Fleabag (2016) (TV Series)'),
@@ -102,9 +107,10 @@ class RunScraperTests(TestCase):
         # note this is overkill - as the year is expected, but what the hell
         archer_dir = self.tv_dir.joinpath('Archer')
         archer_dir.mkdir()
-        process_directory(self.tv_dir, 'tv')
+        added = process_directory(self.tv_dir, 'tv')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 1)
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer')[0], self.archer)
+        self.assertSequenceEqual(added, [])
 
     @patch('imdb_info_local.management.commands.run_scraper.get_imdb_title_data')
     def test_process_dir_tv_new_title(self, get_imdb_title_data_mock):
@@ -119,12 +125,13 @@ class RunScraperTests(TestCase):
         fleabag_dir = self.tv_dir.joinpath('Fleabag')
         fleabag_dir.mkdir()
 
-        process_directory(self.tv_dir, 'tv')
+        added = process_directory(self.tv_dir, 'tv')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 2)
         fleabag = IMDBTitleSearchData.objects.get(title='Fleabag')
         self.assertEqual(fleabag.title, 'Fleabag')
         self.assertEqual(fleabag.rating, '8.7/10')
         self.assertEqual(fleabag.blurb, 'A comedy series adapted from the award-winning play about a young woman trying to cope with life in London whilst coming to terms with a recent tragedy.')
+        self.assertSequenceEqual(added, ['Fleabag'])
 
     @patch('imdb_info_local.management.commands.run_scraper.get_imdb_title_data')
     def test_process_dir_movie_where_title_exists_for_tv(self, get_imdb_title_data_mock):
@@ -147,11 +154,12 @@ class RunScraperTests(TestCase):
         archer_movie_dir = movie_dir.joinpath('Archer')
         archer_movie_dir.mkdir()
 
-        process_directory(movie_dir, 'movie')
+        added = process_directory(movie_dir, 'movie')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 2)
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer').count(), 2)
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer', type='TV').count(), 1)
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer', type='MO').count(), 1)
+        self.assertSequenceEqual(added, ['Archer'])
 
     def test_remove_title_data_for_deleted_files_no_removal_needed(self):
         archer_dir = self.tv_dir.joinpath('Archer')
@@ -159,12 +167,14 @@ class RunScraperTests(TestCase):
         fleabag_dir = self.tv_dir.joinpath('Fleabag')
         fleabag_dir.mkdir()
         # print(f"before delete check: {[t.title for t in IMDBTitleSearchData.objects.all()]}")
-        remove_title_data_for_deleted_files(self.tv_dir, 'tv')
+        removed_titles = remove_title_data_for_deleted_files(self.tv_dir, 'tv')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 1)
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer', type='TV').count(), 1)
+        self.assertSequenceEqual(removed_titles, [])
 
     def test_remove_title_data_for_deleted_files_removal_needed(self):
         fleabag_dir = self.tv_dir.joinpath('Fleabag')
         fleabag_dir.mkdir()
-        remove_title_data_for_deleted_files(self.tv_dir, 'tv')
+        removed = remove_title_data_for_deleted_files(self.tv_dir, 'tv')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 0)
+        self.assertSequenceEqual(removed, ['Archer'])

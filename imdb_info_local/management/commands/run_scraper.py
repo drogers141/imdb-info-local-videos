@@ -60,17 +60,19 @@ def find_results_html(find_results: [IMDBFindTitleResult]) -> str:
     return html
 
 
-def remove_title_data_for_deleted_files(directory: Path, type: str='movie'):
+def remove_title_data_for_deleted_files(directory: Path, type: str='movie') -> [str]:
     """Remove unneeded title data model objects
 
     :param directory - path to directory holding videos
     :param type - 'movie', or 'tv'
+    :return - list of titles removed
     """
     video_title_dirs = directory.glob('*')
     video_titles = [t.name.replace('-', ' ') for t in video_title_dirs]
     # print(f"video title dirs:\n{[v for v in video_title_dirs]}")
     # print(f"video titles:\n{video_titles}")
 
+    removed = []
     title_type = None
     if type == 'movie':
         title_type = IMDBTitleSearchData.MOVIE
@@ -82,15 +84,24 @@ def remove_title_data_for_deleted_files(directory: Path, type: str='movie'):
     for titleData in IMDBTitleSearchData.objects.filter(type=title_type):
         if titleData.title not in video_titles:
             print(f'titleData {titleData} not in directory: {directory} - removing')
+            removed.append(titleData.title)
             titleData.delete()
+
+    return removed
 
 
 def process_directory(directory: Path, type: str = 'movie'):
     """Processes filepaths in directory.
 
-    For each file: gets file info, extracts title name, scrapes IMDB, saves as
-    Model.
+    For each file:
+    * gets file info
+    * extracts title name
+    * checks if the title is not already in the db (title and type (tv, movie) have to be
+      the same to reject)
+    * if not scrapes IMDB for rating and blurb
+    * saves as Model into db.
 
+    It is assumed that all titles in `directory` are of type `type`.
     It is assumed that each title - ie movie or tv series - is in it's own
     directory, with hyphen delimited names.  And best to end with the year.
     Examples:
@@ -110,7 +121,9 @@ def process_directory(directory: Path, type: str = 'movie'):
 
     :param directory - path to directory holding videos
     :param type - 'movie', or 'tv'
+    :return - list of titles added
     """
+    added = []
     for subdir in directory.glob('*'):
         try:
             print(f'processing: {subdir}')
@@ -134,12 +147,14 @@ def process_directory(directory: Path, type: str = 'movie'):
                     file_mtime=mtime,
                     file_ctime=ctime
                 )
+                added.append(title)
                 time.sleep(1)
             else:
                 print(f'title of same type exists: {title} type: {type_}')
         except Exception as e:
             print(f'Exception handling dir: {subdir}')
             raise
+    return added
 
 
 class Command(BaseCommand):
@@ -147,9 +162,19 @@ class Command(BaseCommand):
     Then store as models."""
 
     def handle(self, *args, **options):
-        remove_title_data_for_deleted_files(Path(settings.MOVIE_DIRECTORY), 'movie')
-        remove_title_data_for_deleted_files(Path(settings.MOVIE_DIRECTORY), 'tv')
+        removed_movies = remove_title_data_for_deleted_files(Path(settings.MOVIE_DIRECTORY), 'movie')
+        removed_tv = remove_title_data_for_deleted_files(Path(settings.TV_DIRECTORY), 'tv')
 
-        process_directory(Path(settings.MOVIE_DIRECTORY), 'movie')
-        process_directory(Path(settings.TV_DIRECTORY), 'tv')
+        added_movies = process_directory(Path(settings.MOVIE_DIRECTORY), 'movie')
+        added_tv = process_directory(Path(settings.TV_DIRECTORY), 'tv')
 
+        if removed_movies:
+            print(f'Removed movies: {removed_movies}')
+        if removed_tv:
+            print(f'Removed tv: {removed_tv}')
+        if added_movies:
+            print(f'Added movies: {added_movies}')
+        if added_tv:
+            print(f'Added tv: {added_tv}')
+        if not removed_movies or removed_tv or added_movies or added_tv:
+            print('No movie or tv titles added or removed')
