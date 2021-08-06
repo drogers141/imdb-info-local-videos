@@ -9,6 +9,7 @@ psycopg2-binary = "*"
 requests = "*"
 beautifulsoup4 = "*"
 ipython = "*"
+coverage = "*"
 
 [dev-packages]
 

@@ -3,3 +3,6 @@ db.sqlite3
 .idea/
 temp/
 ipython_log*
+.coverage
+htmlcov/
+
