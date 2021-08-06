@@ -156,17 +156,21 @@
                                 return response.json()
                             })
                             .then(data => {
-                                let newRating = data['rating'];
-                                let newBlurb = data['blurb'];
-                                console.log(`new rating/blurb: ${newRating} ${newBlurb}`);
-                                titleRating.removeChild(titleRating.firstElementChild);
-                                let titleRatingP = document.createElement('p');
-                                titleRatingP.textContent = `${newRating} - ${title}`;
-                                titleRating.appendChild(titleRatingP);
-                                blurb.removeChild(blurb.firstElementChild);
-                                let blurbP = document.createElement('p');
-                                blurbP.textContent = newBlurb;
-                                blurb.appendChild(blurbP);
+                                if ('error' in data) {
+                                    alert(`Error: ${data['error']}`);
+                                } else {
+                                    let newRating = data['rating'];
+                                    let newBlurb = data['blurb'];
+                                    console.log(`new rating/blurb: ${newRating} ${newBlurb}`);
+                                    titleRating.removeChild(titleRating.firstElementChild);
+                                    let titleRatingP = document.createElement('p');
+                                    titleRatingP.textContent = `${newRating} - ${title}`;
+                                    titleRating.appendChild(titleRatingP);
+                                    blurb.removeChild(blurb.firstElementChild);
+                                    let blurbP = document.createElement('p');
+                                    blurbP.textContent = newBlurb;
+                                    blurb.appendChild(blurbP);
+                                }
                             })
                             .catch(error => {
                                 console.log(`Error with fetch: ${error}`);

@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.views import generic
 from django.http import JsonResponse
@@ -6,6 +7,7 @@ from django.http import JsonResponse
 from .models import IMDBTitleSearchData
 from .imdb import imdb_title_data
 
+logger = logging.getLogger(__name__)
 
 class TitleListView(generic.ListView):
     title_type = 'Movies' # or 'TV'
@@ -36,9 +38,9 @@ class MtimeTitleListView(TitleListView):
 def update_title_data(request):
     post_data = json.load(request)['post_data']
     title = post_data['title']
-    type = post_data['video_type']
+    type_ = post_data['video_type']
     title_url = post_data['url']
-    result = IMDBTitleSearchData.objects.filter(title=title, type=type)
+    result = IMDBTitleSearchData.objects.filter(title=title, type=type_)
     if result and len(result) == 1:
         target = result[0]
         new_title_data = imdb_title_data(title_url)
@@ -51,6 +53,7 @@ def update_title_data(request):
         }
     else:
         return_data = {
-            'error': 'Either no match in db or more than 1 title for video type (no bueno).'
+            'error': ('Either no match in db or more than 1 title for video type.  Check the README.md ' +
+                      'for requirements.')
         }
     return JsonResponse(return_data)
