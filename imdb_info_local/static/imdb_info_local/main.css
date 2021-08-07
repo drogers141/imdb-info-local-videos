@@ -1,0 +1,68 @@
+nav ul {
+    margin-left: auto;
+/*width: 60%;*/
+display: flex;
+justify-content: right;
+/*border: dotted 2px green;*/
+/*margin-left: auto;*/
+/*margin-right: 0;*/
+}
+nav li {
+/*border-bottom: dotted 2px blueviolet;*/
+list-style: none;
+flex: 0 1 auto;
+
+/*margin: .5rem 1rem;*/
+}
+nav a {
+    text-decoration: none;
+}
+nav a:link, nav a:visited, nav a:focus {
+/*flex: 1 1 auto;*/
+display: inline-block;
+color: white;
+background: darkseagreen;
+font-size: 2rem;
+/*width: 200px;*/
+line-height: 2;
+text-align: center;
+/*border: solid 1px blueviolet;*/
+margin-right: 5px;
+padding: 0 10px;
+/*background: lightseagreen;*/
+}
+nav a:hover {
+    background: lightseagreen;
+}
+a:link {
+    color: darkgreen;
+}
+a:visited {
+    color: darkcyan;
+}
+h1 {
+    text-align: center;
+}
+.title-list li {
+    list-style: none;
+    border-top: solid 1px darkgreen;
+}
+.main-content {
+    display: flex;
+}
+.title-rating {
+    flex: 0 0 auto;
+    font-size: 1.5rem;
+    margin-right: 16px;
+}
+.blurb {
+    flex: 1 1 auto;
+    border-left: dotted 2px green;
+    padding: 0 8px;
+}
+.title-find-results li {
+    border-top: none;
+}
+.hidden {
+    display: none;
+}

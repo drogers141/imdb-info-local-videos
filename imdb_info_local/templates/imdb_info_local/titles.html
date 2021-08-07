@@ -1,79 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{{ title_type }}</title>
-    <style>
-
-        nav ul {
-            margin-left: auto;
-            {#width: 60%;#}
-            display: flex;
-            justify-content: right;
-            {#border: dotted 2px green;#}
-            {#margin-left: auto;#}
-            {#margin-right: 0;#}
-        }
-        nav li {
-            {#border-bottom: dotted 2px blueviolet;#}
-            list-style: none;
-            flex: 0 1 auto;
-
-            {#margin: .5rem 1rem;#}
-        }
-        nav a {
-            text-decoration: none;
-        }
-        nav a:link, nav a:visited, nav a:focus {
-            {#flex: 1 1 auto;#}
-            display: inline-block;
-            color: white;
-            background: darkseagreen;
-            font-size: 2rem;
-            {#width: 200px;#}
-            line-height: 2;
-            text-align: center;
-            {#border: solid 1px blueviolet;#}
-            margin-right: 5px;
-            padding: 0 10px;
-            {#background: lightseagreen;#}
-        }
-        nav a:hover {
-            background: lightseagreen;
-        }
-        a:link {
-            color: darkgreen;
-        }
-        a:visited {
-            color: darkcyan;
-        }
-        h1 {
-            text-align: center;
-        }
-        .title-list li {
-            list-style: none;
-            border-top: solid 1px darkgreen;
-        }
-        .main-content {
-            display: flex;
-        }
-        .title-rating {
-            flex: 0 0 auto;
-            font-size: 1.5rem;
-            margin-right: 16px;
-        }
-        .blurb {
-            flex: 1 1 auto;
-            border-left: dotted 2px green;
-            padding: 0 8px;
-        }
-        .title-find-results li {
-            border-top: none;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'imdb_info_local/main.css' %}">
+    <script src="{% static 'imdb_info_local/main.js' %}" defer></script>
 </head>
 <body>
 <header>
@@ -109,94 +41,5 @@
         </li>
         {% endfor %}
     </ul>
-<script>
-    {#  Click on the ratings/title div to expose the links to all titles in search #}
-    titleDivs = document.getElementsByClassName('title-rating');
-    console.log('titleDivs: ' + titleDivs.length);
-    for (let i=0; i<titleDivs.length; i++) {
-        titleDivs[i].addEventListener('click', function(e){
-            let mainContent = e.target.closest('.main-content');
-            let titleRating = mainContent.querySelector('.title-rating');
-            let blurb = mainContent.querySelector('.blurb');
-            console.log(`titleRating: ${titleRating.innerText}`)
-            console.log(`blurb: ${blurb.innerText}`)
-            let title = mainContent.dataset.title;
-            let videoType = mainContent.dataset.videoType;
-            let updateUrl = mainContent.dataset.updateUrl;
-            let findResults = mainContent.nextElementSibling;
-            findResults.classList.toggle('hidden');
-            let csrftoken = getCookie('csrftoken');
-            {# When the found titles list is opened add buttons to allow changing the info #}
-            {# for the title to that button's title data #}
-            if (!findResults.classList.contains('hidden')) {
-                Array.from(findResults.querySelectorAll('li')).forEach((e) => {
-                    let url = e.firstChild['href'];
-                    let btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.innerText = 'Use This Instead';
-                    btn.style.marginRight = '1em';
-                    btn.addEventListener('click', btnEv => {
-                        console.log(`url: ${url}  title: ${title} type: ${videoType}`);
-                    {# Post request to update the title info - rescraping IMdb and updating db #}
-                        fetch(updateUrl, {
-                            method: 'POST',
-                            credentials: 'same-origin',
-                            headers:{
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRFToken': csrftoken,
-                            },
-                            body: JSON.stringify({'post_data': {
-                                    'title': title,
-                                    'url': url,
-                                    'video_type': videoType
-                                }})
-                        })
-                            .then(response => {
-                                return response.json()
-                            })
-                            .then(data => {
-                                if ('error' in data) {
-                                    alert(`Error: ${data['error']}`);
-                                } else {
-                                    let newRating = data['rating'];
-                                    let newBlurb = data['blurb'];
-                                    console.log(`new rating/blurb: ${newRating} ${newBlurb}`);
-                                    titleRating.removeChild(titleRating.firstElementChild);
-                                    let titleRatingP = document.createElement('p');
-                                    titleRatingP.textContent = `${newRating} - ${title}`;
-                                    titleRating.appendChild(titleRatingP);
-                                    blurb.removeChild(blurb.firstElementChild);
-                                    let blurbP = document.createElement('p');
-                                    blurbP.textContent = newBlurb;
-                                    blurb.appendChild(blurbP);
-                                }
-                            })
-                            .catch(error => {
-                                console.log(`Error with fetch: ${error}`);
-                            });
-                    });
-                    e.insertBefore(btn, e.firstChild);
-                });
-            }
-        });
-    }
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-</script>
 </body>
 </html>
