@@ -25,8 +25,10 @@ function setupResultsListButtons() {
                         let btn = document.createElement('button');
                         btn.type = 'button';
                         btn.innerText = 'Use This Instead';
-                        btn.style.marginRight = '1em';
+                        // btn.style.marginRight = '1em';
+                        btn.classList.add('button');
                         btn.addEventListener('click', btnEv => {
+                            // showLoading(mainContent);
                             postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRating, blurb);
                         });
                         e.insertBefore(btn, e.firstChild);
@@ -37,9 +39,20 @@ function setupResultsListButtons() {
     }
 }
 
+function showLoading(div) {
+    // div.classList.toggle('loading');
+    let titleRating = document.querySelector('.title-rating p');
+    let origText = titleRating.textContent;
+
+    titleRating.textContent = 'Loading ...';
+
+}
+
 function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRatingDiv, blurbDiv) {
     console.log(`url: ${imdbTitleUrl}  title: ${title} type: ${videoType}`);
     let csrftoken = getCookie('csrftoken');
+    // titleRatingDiv.classList.add('loading');
+    showLoading(titleRatingDiv);
     /* Post request to update the title info - rescraping IMdb and updating db */
     fetch(updateUrl, {
         method: 'POST',
@@ -59,6 +72,7 @@ function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRatingDiv, b
             return response.json()
         })
         .then(data => {
+            // titleRatingDiv.classList.remove('loading');
             if ('error' in data) {
                 alert(`Error: ${data['error']}`);
             } else {
@@ -73,6 +87,7 @@ function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRatingDiv, b
                 let blurbP = document.createElement('p');
                 blurbP.textContent = newBlurb;
                 blurbDiv.appendChild(blurbP);
+
             }
         })
         .catch(error => {
