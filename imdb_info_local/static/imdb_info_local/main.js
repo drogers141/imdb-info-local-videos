@@ -28,31 +28,61 @@ function setupResultsListButtons() {
                         // btn.style.marginRight = '1em';
                         btn.classList.add('button');
                         btn.addEventListener('click', btnEv => {
-                            // showLoading(mainContent);
-                            postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRating, blurb);
+                            postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRating, blurb, btn);
                         });
                         e.insertBefore(btn, e.firstChild);
                     });
+                    /* Add a button and text input for user to input a title url as a last resort
+                     */
+                    let li = document.createElement('li');
+                    let txtBox = document.createElement('input');
+                    txtBox.type = 'url';
+                    // txtBox.size = 50;
+
+                    let btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.innerText = 'Use Title URL';
+                    btn.classList.add('button');
+                    btn.addEventListener('click', btnEv => {
+                        let titleUrl = txtBox.value;
+                        console.log('titleUrl: ' + titleUrl);
+                        postUpdate(title, updateUrl, titleUrl, videoType, titleRating, blurb, btn);
+                        txtBox.value = '';
+                    });
+                    li.append(btn, txtBox);
+                    findResults.firstElementChild.appendChild(li);
                 }
             }
         });
     }
 }
 
-function showLoading(div) {
-    // div.classList.toggle('loading');
-    let titleRating = document.querySelector('.title-rating p');
-    let origText = titleRating.textContent;
-
-    titleRating.textContent = 'Loading ...';
-
+/**
+ * Show or remove font-awesome spinner from button
+ *
+ * @param btn - button to add spinner to
+ */
+function handleLoadingDisplay(btn) {
+    if (btn.querySelector('i')) {
+        btn.removeChild(btn.querySelector('i'));
+    } else {
+        let iElem = document.createElement('i');
+        iElem.classList.add('fa', 'fa-spinner', 'fa-spin');
+        btn.insertBefore(iElem, btn.firstChild);
+    }
 }
 
-function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRatingDiv, blurbDiv) {
+
+function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRatingDiv, blurbDiv, loadBtn) {
     console.log(`url: ${imdbTitleUrl}  title: ${title} type: ${videoType}`);
     let csrftoken = getCookie('csrftoken');
-    // titleRatingDiv.classList.add('loading');
-    showLoading(titleRatingDiv);
+    handleLoadingDisplay(loadBtn);
+    const timeLimit = 10000;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+        controller.abort();
+    }, timeLimit);
+
     /* Post request to update the title info - rescraping IMdb and updating db */
     fetch(updateUrl, {
         method: 'POST',
@@ -66,15 +96,18 @@ function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRatingDiv, b
                 'title': title,
                 'url': imdbTitleUrl,
                 'video_type': videoType
-            }})
+            }}),
+        signal: controller.signal
     })
         .then(response => {
+            if (!response.ok) {
+                throw new Error(`${response.status}: ${response.statusText}`);
+            }
             return response.json()
         })
         .then(data => {
-            // titleRatingDiv.classList.remove('loading');
             if ('error' in data) {
-                alert(`Error: ${data['error']}`);
+                throw new Error(data['error']);
             } else {
                 let newRating = data['rating'];
                 let newBlurb = data['blurb'];
@@ -91,8 +124,13 @@ function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRatingDiv, b
             }
         })
         .catch(error => {
-            console.log(`Error with fetch: ${error}`);
-        });
+            if (error.name === 'AbortError') {
+                alert('Timeout updating from IMdb.');
+            } else {
+                alert(`Error: ${error}`);
+            }
+        })
+        .finally(() => handleLoadingDisplay(loadBtn));
 }
 
 function getCookie(name) {
