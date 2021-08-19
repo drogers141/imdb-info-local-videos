@@ -1,26 +1,11 @@
+{% extends 'imdb_info_local/_base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ title_type }}</title>
-    <link rel="stylesheet" href="{% static 'imdb_info_local/main.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="{% static 'imdb_info_local/main.js' %}" defer></script>
-</head>
-<body>
-<header>
-    <nav>
-        <ul>
-            <li><a href="{% url 'movie_list' %}">Movies</a></li>
-            <li><a href="{% url 'tv_list' %}">TV</a></li>
-            <li><a href="{% url 'movie_mtime' %}">Movies mtime</a></li>
-            <li><a href="{% url 'tv_mtime' %}">TV mtime</a></li>
-        </ul>
-    </nav>
-</header>
+
+{% block title %}{{ title_type }}{% endblock title %}
+
+{% block content %}
     <h1>{{ title_type }} - {{ count }} Titles</h1>
-    <ul class="title-list">{% for title in title_list %}
+    <ul class="title-list">{% for title in results_list %}
         <li>
         <div class="main-content"
              data-title="{{ title.title }}"
@@ -42,5 +27,4 @@
         </li>
         {% endfor %}
     </ul>
-</body>
-</html>
+{% endblock content %}

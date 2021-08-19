@@ -1,19 +1,24 @@
+/********** Header Layout **********/
+
+@media screen and (min-width: 870px) {
+    header {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+/******** Navigation *******/
+
 nav ul {
-    margin-left: auto;
-    /*width: 60%;*/
+    margin: 0 auto;
+    padding: 0;
     display: flex;
-    justify-content: right;
-    /*border: dotted 2px green;*/
-    /*margin-left: auto;*/
-    /*margin-right: 0;*/
 }
 
 nav li {
     /*border-bottom: dotted 2px blueviolet;*/
     list-style: none;
     flex: 0 1 auto;
-
-    /*margin: .5rem 1rem;*/
 }
 
 nav a {
@@ -44,6 +49,21 @@ nav a:active {
     background: #001000;
 }
 
+nav {
+    margin: 16px 0;
+    /* change if font changes */
+    width: 443px;
+}
+
+/********  Search Box ********/
+
+input[type='search'] {
+    height: 36px;
+    font-size: 16px;
+    width: 350px;
+    margin: 22px 36px 22px auto;
+}
+
 a:link {
     color: darkgreen;
 }
@@ -53,8 +73,8 @@ a:visited {
 }
 
 h1 {
-    /*text-align: center;*/
-    margin: 32px auto 32px 240px;
+    text-align: center;
+    /*margin: 32px auto 32px 240px;*/
 }
 
 .title-list li {
@@ -114,7 +134,8 @@ h1 {
     background: #001000;
 }
 
-/* font awesome spinner */
+/********* font awesome spinner *********/
+
 .fa {
     margin-right: 8px;
 }

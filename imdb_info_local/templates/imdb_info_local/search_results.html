@@ -1,0 +1,31 @@
+{% extends 'imdb_info_local/_base.html' %}
+{% load static %}
+
+{% block title %}Search Results{% endblock title %}
+
+{% block content %}
+    <h1>Matching Titles</h1>
+    <ul class="title-list">{% for title in results_list %}
+        <li>
+            <div class="main-content"
+                 data-title="{{ title.title }}"
+                 data-video-type="{{ title.type }}"
+                 data-update-url="{% url 'title_update' %}"
+            >
+                <div class="title-rating">
+                    <p>{{ title.rating }} - {{ title.title }}</p>
+                </div>
+                <div class="blurb">
+                    <p>{{ title.blurb|safe }}</p>
+                </div>
+            </div>
+            <div class="title-find-results hidden">
+                All results from title search:
+                {{ title.find_results|safe }}
+            </div>
+
+        </li>
+    {% endfor %}
+    </ul>
+
+{% endblock content %}

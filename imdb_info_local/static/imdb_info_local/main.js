@@ -150,3 +150,6 @@ function getCookie(name) {
 }
 
 setupResultsListButtons();
+
+searchBox = document.querySelector('input');
+searchBox.value = '';

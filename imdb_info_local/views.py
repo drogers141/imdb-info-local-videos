@@ -1,13 +1,16 @@
 import json
 import logging
 
+from django.shortcuts import render
 from django.views import generic
 from django.http import JsonResponse
+from django.db.models import Q
 
 from .models import IMDBTitleSearchData
 from .imdb import imdb_title_data
 
 logger = logging.getLogger(__name__)
+
 
 class TitleListView(generic.ListView):
     title_type = 'Movies' # or 'TV'
@@ -58,3 +61,25 @@ def update_title_data(request):
                       'for requirements.')
         }
     return JsonResponse(return_data)
+
+
+class SearchResultsListView(generic.ListView):
+    context_object_name = 'results_list'
+    model = IMDBTitleSearchData
+    template_name = 'imdb_info_local/search_results.html'
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        return IMDBTitleSearchData.objects.filter(
+            Q(title__icontains=query) | Q(blurb__icontains=query)
+        )
+
+
+def home(request):
+    titles = IMDBTitleSearchData.objects.count()
+    tv = IMDBTitleSearchData.objects.filter(type=IMDBTitleSearchData.TV).count()
+    movies = IMDBTitleSearchData.objects.filter(type=IMDBTitleSearchData.MOVIE).count()
+    context = {'total_titles': titles,
+               'tv_count': tv,
+               'movie_count': movies}
+    return render(request, 'imdb_info_local/home.html', context)

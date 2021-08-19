@@ -1,0 +1,12 @@
+{% extends 'imdb_info_local/_base.html' %}
+{% load static %}
+
+{% block title %}IMdb Info{% endblock title %}
+
+{% block content %}
+
+<h1>{{ total_titles }} Titles</h1>
+    <h2>{{ tv_count }} TV </h2>
+    <h2>{{ movie_count }} Movies</h2>
+
+{% endblock content %}
