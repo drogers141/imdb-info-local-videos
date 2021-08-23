@@ -5,7 +5,7 @@
 
 {% block content %}
     <h1>{{ title_type }} - {{ count }} Titles</h1>
-    <ul class="title-list">{% for title in results_list %}
+    <ul class="title-list">{% for title in title_list %}
         <li>
         <div class="main-content"
              data-title="{{ title.title }}"
