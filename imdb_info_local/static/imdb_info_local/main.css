@@ -89,7 +89,15 @@ h1 {
 .title-rating {
     flex: 0 0 auto;
     font-size: 1.5rem;
-    margin-right: 16px;
+    margin: auto 16px;
+}
+
+/*.title-image {*/
+/*    height: 76px;*/
+/*}*/
+
+.title-image img {
+    display: block;
 }
 
 .blurb {

@@ -145,6 +145,10 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# media
+MEDIA_URL = '/media/'
+MEDIA_ROOT = str(BASE_DIR / 'media')
+
 # Directories where tv and movie files are located
 TV_DIRECTORY = '/Volumes/dr-wd-2/tv'
 MOVIE_DIRECTORY = '/Volumes/dr-wd-2/movies'

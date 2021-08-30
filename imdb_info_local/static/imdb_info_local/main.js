@@ -7,8 +7,8 @@ function setupResultsListButtons() {
     for (let i=0; i<titleDivs.length; i++) {
         titleDivs[i].addEventListener('click', function(e){
             let mainContent = e.target.closest('.main-content');
-            let titleRating = mainContent.querySelector('.title-rating');
-            let blurb = mainContent.querySelector('.blurb');
+            // let titleRating = mainContent.querySelector('.title-rating');
+            // let blurb = mainContent.querySelector('.blurb');
             // console.log(`titleRating: ${titleRating.innerText}`)
             // console.log(`blurb: ${blurb.innerText}`)
             let title = mainContent.dataset.title;
@@ -28,7 +28,7 @@ function setupResultsListButtons() {
                         // btn.style.marginRight = '1em';
                         btn.classList.add('button');
                         btn.addEventListener('click', btnEv => {
-                            postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRating, blurb, btn);
+                            postUpdate(title, updateUrl, imdbTitleUrl, videoType, mainContent, btn);
                         });
                         e.insertBefore(btn, e.firstChild);
                     });
@@ -46,7 +46,7 @@ function setupResultsListButtons() {
                     btn.addEventListener('click', btnEv => {
                         let titleUrl = txtBox.value;
                         console.log('titleUrl: ' + titleUrl);
-                        postUpdate(title, updateUrl, titleUrl, videoType, titleRating, blurb, btn);
+                        postUpdate(title, updateUrl, titleUrl, videoType, mainContent, btn);
                         txtBox.value = '';
                     });
                     li.append(btn, txtBox);
@@ -72,8 +72,37 @@ function handleLoadingDisplay(btn) {
     }
 }
 
+function refreshImage(imageDiv, newUrl) {
+    let oldImg = imageDiv.querySelector('img');
+    let oldImgUrl = new URL(oldImg.src);
+    let imgHeight = oldImg.height;
+    let newImgUrl = new URL(`${oldImgUrl.protocol}//${oldImgUrl.host}${newUrl}`);
+    console.log(`old image src: ${oldImgUrl}`);
+    imageDiv.removeChild(imageDiv.firstElementChild);
+    let newImg = document.createElement('img');
+    newImg.src = newImgUrl.href;
+    newImg.height = imgHeight;
+    console.log(`new image src: ${newImgUrl}`);
+    imageDiv.appendChild(newImg);
+}
 
-function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRatingDiv, blurbDiv, loadBtn) {
+function refreshRatingAndBlurb(title, titleContentDiv, newRating, newBlurb) {
+    let titleRatingDiv = titleContentDiv.querySelector('.title-rating');
+    let blurbDiv = titleContentDiv.querySelector('.blurb');
+    // let newRating = data['rating'];
+    // let newBlurb = data['blurb'];
+    console.log(`new rating/blurb: ${newRating} ${newBlurb}`);
+    titleRatingDiv.removeChild(titleRatingDiv.firstElementChild);
+    let titleRatingP = document.createElement('p');
+    titleRatingP.textContent = `${newRating} - ${title}`;
+    titleRatingDiv.appendChild(titleRatingP);
+    blurbDiv.removeChild(blurbDiv.firstElementChild);
+    let blurbP = document.createElement('p');
+    blurbP.textContent = newBlurb;
+    blurbDiv.appendChild(blurbP);
+}
+
+function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleContentDiv, loadBtn) {
     console.log(`url: ${imdbTitleUrl}  title: ${title} type: ${videoType}`);
     let csrftoken = getCookie('csrftoken');
     handleLoadingDisplay(loadBtn);
@@ -109,18 +138,8 @@ function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleRatingDiv, b
             if ('error' in data) {
                 throw new Error(data['error']);
             } else {
-                let newRating = data['rating'];
-                let newBlurb = data['blurb'];
-                console.log(`new rating/blurb: ${newRating} ${newBlurb}`);
-                titleRatingDiv.removeChild(titleRatingDiv.firstElementChild);
-                let titleRatingP = document.createElement('p');
-                titleRatingP.textContent = `${newRating} - ${title}`;
-                titleRatingDiv.appendChild(titleRatingP);
-                blurbDiv.removeChild(blurbDiv.firstElementChild);
-                let blurbP = document.createElement('p');
-                blurbP.textContent = newBlurb;
-                blurbDiv.appendChild(blurbP);
-
+                refreshRatingAndBlurb(title, titleContentDiv, data['rating'], data['blurb']);
+                refreshImage(titleContentDiv.querySelector('.title-image'), data['image-url']);
             }
         })
         .catch(error => {

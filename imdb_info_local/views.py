@@ -6,7 +6,7 @@ from django.views import generic
 from django.http import JsonResponse
 from django.db.models import Q
 
-from .models import IMDBTitleSearchData
+from .models import IMDBTitleSearchData, update_image_file
 from .imdb import imdb_title_data
 
 logger = logging.getLogger(__name__)
@@ -50,10 +50,16 @@ def update_title_data(request):
         new_title_data = imdb_title_data(title_url)
         target.rating = new_title_data.rating
         target.blurb = new_title_data.blurb
+        print(f'target.image.url: {target.image.url}')
+
+        # target.image = add_image_file(target, new_title_data.image_file)
+        update_image_file(target, new_title_data.image_file)
         target.save()
+        print(f'new target.image.url: {target.image.url}')
         return_data = {
             'rating': new_title_data.rating,
-            'blurb': new_title_data.blurb
+            'blurb': new_title_data.blurb,
+            'image-url': target.image.url
         }
     else:
         return_data = {

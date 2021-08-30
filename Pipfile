@@ -10,6 +10,7 @@ requests = "*"
 beautifulsoup4 = "*"
 ipython = "*"
 coverage = "*"
+pillow = "*"
 
 [dev-packages]
 

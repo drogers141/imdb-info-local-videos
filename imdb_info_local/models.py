@@ -1,4 +1,8 @@
+from pathlib import Path
+import os
+
 from django.db import models
+from django.core.files import File
 
 
 class IMDBTitleSearchData(models.Model):
@@ -8,7 +12,7 @@ class IMDBTitleSearchData(models.Model):
     1 - get "title" from local filename - probably ends with year made
     2 - do a search for this title at IMDB
     3 - pick the first title found in that search
-    4 - scrape for ratings and blurb at the url for that title
+    4 - scrape for ratings, blurb and image at the url for that title
 
     Most are obvious.
     type - either movie or tv series
@@ -32,6 +36,7 @@ class IMDBTitleSearchData(models.Model):
     title = models.CharField(max_length=512)
     rating = models.CharField(max_length=32)
     blurb = models.TextField()
+    image = models.ImageField(upload_to='title-images/', blank=True)
     find_results = models.TextField()
     file_path = models.CharField(max_length=512)
     file_mtime = models.BigIntegerField()
@@ -46,3 +51,28 @@ class IMDBTitleSearchData(models.Model):
     def verbose_str(self):
         return (f'{self.title}\nrating: {self.rating} - type: {self.type}\n{self.blurb}\n' +
                 f'find_results:\n{self.find_results}')
+
+
+def add_image_file(title_data_model: IMDBTitleSearchData, image_path: Path):
+    """Add the image file to the model
+
+    :param image_path - path to locally saved image file
+    """
+    with open(image_path, 'rb') as fp:
+        django_file = File(fp)
+        title_data_model.image.save(str(image_path.name), django_file, save=True)
+
+
+def update_image_file(title_data_model: IMDBTitleSearchData, image_path: Path):
+    """Update the image file for the model
+
+    :param image_path - path to locally saved image file
+    """
+    with open(image_path, 'rb') as fp:
+        print(f'image_path: {image_path}')
+        django_file = File(fp)
+        if Path(title_data_model.image.path).exists():
+            print(f'deleting: {title_data_model.image.path}')
+            os.remove(title_data_model.image.path)
+            print(f'saving: {str(image_path.name)}')
+            title_data_model.image.save(str(image_path.name), django_file, save=True)

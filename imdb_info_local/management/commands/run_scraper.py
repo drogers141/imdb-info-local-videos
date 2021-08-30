@@ -5,8 +5,9 @@ import time
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.conf import settings
+from django.core.files import File
 
-from imdb_info_local.models import IMDBTitleSearchData
+from imdb_info_local.models import IMDBTitleSearchData, add_image_file
 from imdb_info_local.imdb import (imdb_title_search_results, imdb_title_data,
                                   IMDBTitleData, IMDBFindTitleResult)
 
@@ -32,7 +33,7 @@ def get_imdb_title_data(title: str) -> IMDBTitleSearchResults:
     1 - get IMDB search page for title
     2 - scrape the page for a list of candidate titles
     3 - pick the first candidate
-    4 - scrape the title page for this candidate for rating and blurb
+    4 - scrape the title page for this candidate for rating, blurb and image
 
     The find results from step 2 are saved so they can be presented to the
     user in case the wrong title is picked.
@@ -137,7 +138,7 @@ def process_directory(directory: Path, type: str = 'movie'):
             if not IMDBTitleSearchData.objects.filter(title=title, type=type_):
                 title_search_results = get_imdb_title_data(title)
                 logger.debug(f'title data: {title_search_results}')
-                IMDBTitleSearchData.objects.create(
+                title_data_instance = IMDBTitleSearchData(
                     title=title,
                     type=type_,
                     rating=title_search_results.title_data.rating,
@@ -147,6 +148,8 @@ def process_directory(directory: Path, type: str = 'movie'):
                     file_mtime=mtime,
                     file_ctime=ctime
                 )
+                add_image_file(title_data_instance, title_search_results.title_data.image_file)
+                title_data_instance.save()
                 added.append(title)
                 time.sleep(1)
             else:
@@ -161,20 +164,42 @@ class Command(BaseCommand):
     help = """Select movie or tv titles from filenames, scrape IMDB for data on each title.
     Then store as models."""
 
+    def add_arguments(self, parser):
+        parser.add_argument('-d', '--dir', help='Get titles from this directory.')
+        parser.add_argument('-t', '--type', help='Use with -d, --dir, specify video type in ' +
+                                                 'directory -- "tv" or "movie"')
+
     def handle(self, *args, **options):
-        removed_movies = remove_title_data_for_deleted_files(Path(settings.MOVIE_DIRECTORY), 'movie')
-        removed_tv = remove_title_data_for_deleted_files(Path(settings.TV_DIRECTORY), 'tv')
+        dir_ = options.get('dir')
+        type_ = options.get('type')
+        if dir_ or type_:
+            if not (dir_ and type_):
+                logger.error(f'Type must be specified with directory option: dir: {dir_}, type: {type_}')
+                return
 
-        added_movies = process_directory(Path(settings.MOVIE_DIRECTORY), 'movie')
-        added_tv = process_directory(Path(settings.TV_DIRECTORY), 'tv')
+            added_movies = process_directory(Path(dir_), type_)
+            if added_movies:
+                logger.info(f'Added movies: {added_movies}')
+            logger.info('No movies removed when called with arguments.')
+            self.stdout.write('Also - as the program currently behaves, any titles in directories not in the standard tv ' +
+                        'or movie directories (in settings.py) will be removed from the database when running the ' +
+                        'standard run_scraper command with no arguments.')
 
-        if removed_movies:
-            logger.info(f'Removed movies: {removed_movies}')
-        if removed_tv:
-            logger.info(f'Removed tv: {removed_tv}')
-        if added_movies:
-            logger.info(f'Added movies: {added_movies}')
-        if added_tv:
-            logger.info(f'Added tv: {added_tv}')
-        if not removed_movies or removed_tv or added_movies or added_tv:
-            logger.info('No movie or tv titles added or removed')
+        else:
+
+            removed_movies = remove_title_data_for_deleted_files(Path(settings.MOVIE_DIRECTORY), 'movie')
+            removed_tv = remove_title_data_for_deleted_files(Path(settings.TV_DIRECTORY), 'tv')
+
+            added_movies = process_directory(Path(settings.MOVIE_DIRECTORY), 'movie')
+            added_tv = process_directory(Path(settings.TV_DIRECTORY), 'tv')
+
+            if removed_movies:
+                logger.info(f'Removed movies: {removed_movies}')
+            if removed_tv:
+                logger.info(f'Removed tv: {removed_tv}')
+            if added_movies:
+                logger.info(f'Added movies: {added_movies}')
+            if added_tv:
+                logger.info(f'Added tv: {added_tv}')
+            if not removed_movies or removed_tv or added_movies or added_tv:
+                logger.info('No movie or tv titles added or removed')
