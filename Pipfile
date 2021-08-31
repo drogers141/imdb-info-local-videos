@@ -11,6 +11,7 @@ beautifulsoup4 = "*"
 ipython = "*"
 coverage = "*"
 pillow = "*"
+rich = "*"
 
 [dev-packages]
 

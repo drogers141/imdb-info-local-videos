@@ -7,10 +7,6 @@ function setupResultsListButtons() {
     for (let i=0; i<titleDivs.length; i++) {
         titleDivs[i].addEventListener('click', function(e){
             let mainContent = e.target.closest('.main-content');
-            // let titleRating = mainContent.querySelector('.title-rating');
-            // let blurb = mainContent.querySelector('.blurb');
-            // console.log(`titleRating: ${titleRating.innerText}`)
-            // console.log(`blurb: ${blurb.innerText}`)
             let title = mainContent.dataset.title;
             let videoType = mainContent.dataset.videoType;
             let updateUrl = mainContent.dataset.updateUrl;
@@ -89,8 +85,6 @@ function refreshImage(imageDiv, newUrl) {
 function refreshRatingAndBlurb(title, titleContentDiv, newRating, newBlurb) {
     let titleRatingDiv = titleContentDiv.querySelector('.title-rating');
     let blurbDiv = titleContentDiv.querySelector('.blurb');
-    // let newRating = data['rating'];
-    // let newBlurb = data['blurb'];
     console.log(`new rating/blurb: ${newRating} ${newBlurb}`);
     titleRatingDiv.removeChild(titleRatingDiv.firstElementChild);
     let titleRatingP = document.createElement('p');

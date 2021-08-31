@@ -7,6 +7,8 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.files import File
 
+from rich.progress import track
+
 from imdb_info_local.models import IMDBTitleSearchData, add_image_file
 from imdb_info_local.imdb import (imdb_title_search_results, imdb_title_data,
                                   IMDBTitleData, IMDBFindTitleResult)
@@ -118,14 +120,17 @@ def process_directory(directory: Path, type: str = 'movie'):
     directory name with ' ' to create the title.  In particular, names with
     periods would be problematic - e.g. Tosh.0
     Of course this will incorrectly parse hyphenated names, but that is rare,
-    and this is a fast and dirty project.
+    and this is not meant to be robust in terms of the title that is displayed.
+    It's more important to get the right IMdb info.
 
     :param directory - path to directory holding videos
     :param type - 'movie', or 'tv'
     :return - list of titles added
     """
     added = []
-    for subdir in directory.glob('*'):
+    title_subdirs = [d for d in directory.glob('*')]
+
+    for subdir in track(title_subdirs, description='Processing titles...'):
         try:
             logger.debug(f'processing: {subdir}')
             path = subdir.as_posix()
