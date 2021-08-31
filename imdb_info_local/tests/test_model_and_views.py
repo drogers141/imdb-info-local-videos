@@ -1,3 +1,4 @@
+import os
 from unittest.mock import patch
 from pathlib import Path
 import re
@@ -46,6 +47,13 @@ class IMDBTitleSearchDataTests(TestCase):
             file_mtime=1604372147,
             file_ctime=1604372147,
         )
+
+    def cleanup_image_files(self):
+        # call this from the last test
+        # cleanup image files one time rather than recreating for each test
+        # less performance hit
+        os.remove(self.tv.image.path)
+        os.remove(self.movie.image.path)
 
     def test_model(self):
         self.assertEqual(self.movie.verbose_str(),
@@ -107,6 +115,12 @@ class IMDBTitleSearchDataTests(TestCase):
         self.assertEqual(self.tv.file_path, '/Volumes/dr-wd-2/tv/Archer')
         self.assertEqual(self.tv.file_mtime, 1604372147)
         self.assertEqual(self.tv.file_ctime, 1604372147)
+
+        # cleanup image files one time rather than recreating for each test
+        # less performance hit
+        # note that this needs to be set here so the tv image path is the updated path
+        os.remove(self.tv.image.path)
+        os.remove(self.movie.image.path)
 
     def test_update_title_data_nonexistent(self):
         post_data = {
