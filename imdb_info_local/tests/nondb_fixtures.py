@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from imdb_info_local.imdb import IMDBTitleData, IMDBFindTitleResult
 
 # goes with data/imdb-search-archer.html
@@ -10,5 +12,6 @@ archer_find_title_result = IMDBFindTitleResult(
 # goes with data/archer-title-page.html
 archer_title_data = IMDBTitleData(
     rating='8.6/10',
-    blurb='Covert black ops and espionage take a back seat to zany personalities and relationships between secret agents and drones.'
+    blurb='Covert black ops and espionage take a back seat to zany personalities and relationships between secret agents and drones.',
+    image_file=Path('/tmp/archer.jpg')
 )

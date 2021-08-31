@@ -11,12 +11,13 @@ def save_to_local_file(url, filename):
         outfile.write(str(soup))
 
 
-def create_subdirs_from_title_list(title_list: Path, output_dir: Path):
+def create_subdirs_from_title_list(title_list: str, output_dir: str):
     """Creates an empty subdir for each line in title_list in output_dir
     """
-    if not output_dir.is_dir():
-        output_dir.mkdir()
+    output_dir_path = Path(output_dir)
+    if not output_dir_path.is_dir():
+        output_dir_path.mkdir()
     for title in open(title_list):
         title = title.strip()
         if title:
-            output_dir.joinpath(title).mkdir()
+            output_dir_path.joinpath(title).mkdir()

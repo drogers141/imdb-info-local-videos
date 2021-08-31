@@ -93,7 +93,7 @@ def remove_title_data_for_deleted_files(directory: Path, type: str='movie') -> [
     return removed
 
 
-def process_directory(directory: Path, type: str = 'movie'):
+def process_directory(directory: Path, title_type: str = 'movie'):
     """Processes filepaths in directory.
 
     For each file:
@@ -124,9 +124,11 @@ def process_directory(directory: Path, type: str = 'movie'):
     It's more important to get the right IMdb info.
 
     :param directory - path to directory holding videos
-    :param type - 'movie', or 'tv'
+    :param title_type - 'movie', or 'tv'
     :return - list of titles added
     """
+    assert title_type in ('tv', 'movie'), 'title_type must be "movie" or "tv"'
+
     added = []
     title_subdirs = [d for d in directory.glob('*')]
 
@@ -134,7 +136,7 @@ def process_directory(directory: Path, type: str = 'movie'):
         try:
             logger.debug(f'processing: {subdir}')
             path = subdir.as_posix()
-            type_ = IMDBTitleSearchData.TV if type == 'tv' else IMDBTitleSearchData.MOVIE
+            type_ = IMDBTitleSearchData.TV if title_type == 'tv' else IMDBTitleSearchData.MOVIE
             mtime = int(subdir.stat().st_mtime)
             ctime = int(subdir.stat().st_ctime)
             logger.debug(f'path: {path}\nmtime: {mtime}, ctime: {ctime}')
