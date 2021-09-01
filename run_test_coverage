@@ -1,0 +1,15 @@
+#!/bin/bash
+# specify how to run coverage.py for this project
+# as an executable
+# this will run coverage and create an html report with results
+# on mac it will open the report
+# run from this directory
+
+pipenv run coverage run --source=imdb_info_local --omit='imdb_info_local/utils.py'  manage.py test imdb_info_local
+
+pipenv run coverage html
+
+echo 'open htmlcov/index.html in browser if it does not open automatically'
+
+# open if in mac
+open htmlcov/index.html
