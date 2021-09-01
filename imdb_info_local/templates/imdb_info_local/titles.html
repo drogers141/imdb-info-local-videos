@@ -6,31 +6,6 @@
 {% block content %}
     <h1>{{ title_type }} - {{ count }} Titles</h1>
     <ul class="title-list">{% for title in title_list %}
-        {% if title.title == 'A Girl Walks Home Alone At Night 2014' %}
-{#            <li>A Girl Walks Home Alone At Night</li>#}
-            <li>
-                <div class="main-content"
-                     data-title="{{ title.title }}"
-                     data-video-type="{{ title.type }}"
-                     data-update-url="{% url 'title_update' %}"
-                >
-                    <div class="title-image">
-                        <img src="{% static 'girl-walks-big.jpg' %}" height="76.8px">
-                    </div>
-                    <div class="title-rating">
-                        <p>{{ title.rating }} - {{ title.title }}</p>
-                    </div>
-                    <div class="blurb">
-                        <p>{{ title.blurb|safe }}</p>
-                    </div>
-                </div>
-                <div class="title-find-results hidden">
-                    All results from title search:
-                    {{ title.find_results|safe }}
-                </div>
-
-            </li>
-        {% endif %}
         <li>
         <div class="main-content"
              data-title="{{ title.title }}"
@@ -38,7 +13,11 @@
              data-update-url="{% url 'title_update' %}"
         >
             <div class="title-image">
+                {% if not title.image %}
+                <img src="{% static 'imdb_info_local/futurama-fry.jpg' %}" height="76.8px" width="51.9px">
+                {% else %}
                 <img src="{{ title.image.url }}" height="76.8px">
+                {% endif %}
             </div>
             <div class="title-rating">
                 <p>{{ title.rating }} - {{ title.title }}</p>

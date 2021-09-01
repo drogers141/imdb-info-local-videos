@@ -9,7 +9,7 @@ from django.core.files import File
 
 from rich.progress import track
 
-from imdb_info_local.models import IMDBTitleSearchData, add_image_file
+from imdb_info_local.models import IMDBTitleSearchData, add_image_file, NON_EXISTENT_PATH
 from imdb_info_local.imdb import (imdb_title_search_results, imdb_title_data,
                                   IMDBTitleData, IMDBFindTitleResult)
 
@@ -51,7 +51,7 @@ def get_imdb_title_data(title: str) -> IMDBTitleSearchResults:
         return IMDBTitleSearchResults(
             title=title,
             find_results=search_results,
-            title_data= IMDBTitleData('N/A', 'No titles found in search', Path('/tmp/not-there'))
+            title_data= IMDBTitleData('N/A', 'No titles found in search', NON_EXISTENT_PATH)
         )
 
 
@@ -132,7 +132,7 @@ def process_directory(directory: Path, title_type: str = 'movie'):
     added = []
     title_subdirs = [d for d in directory.glob('*')]
 
-    for subdir in track(title_subdirs, description='Processing titles...'):
+    for subdir in track(title_subdirs, description=f'Processing {title_type} titles...'):
         try:
             logger.debug(f'processing: {subdir}')
             path = subdir.as_posix()

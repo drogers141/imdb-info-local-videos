@@ -7,7 +7,7 @@ from django.core.management import call_command
 from django.conf import settings
 
 from imdb_info_local.imdb import IMDBTitleData, IMDBFindTitleResult
-from imdb_info_local.models import IMDBTitleSearchData
+from imdb_info_local.models import IMDBTitleSearchData, NON_EXISTENT_PATH
 from imdb_info_local.management.commands.run_scraper import (
     IMDBTitleSearchResults, get_imdb_title_data, find_results_html,
     remove_title_data_for_deleted_files, process_directory
@@ -42,7 +42,7 @@ class RunScraperNoDBTests(SimpleTestCase):
         expected = IMDBTitleSearchResults(
             title='Unknown Title',
             find_results=[],
-            title_data=IMDBTitleData('N/A', 'No titles found in search', Path('/tmp/not-there'))
+            title_data=IMDBTitleData('N/A', 'No titles found in search', NON_EXISTENT_PATH)
         )
         actual = get_imdb_title_data('Unknown Title')
         self.assertEqual(expected.title, actual.title)

@@ -4,6 +4,13 @@ import os
 from django.db import models
 from django.core.files import File
 
+# string value with trailing slash
+# add to path of MEDIA_ROOT for directory containing images
+IMAGE_SUBDIRECTORY = 'title-images/'
+
+# sentinel for a path when no image is saved locally
+NON_EXISTENT_PATH = Path('/this path must not exist')
+
 
 class IMDBTitleSearchData(models.Model):
     """Data for one movie or tv series title
@@ -36,7 +43,7 @@ class IMDBTitleSearchData(models.Model):
     title = models.CharField(max_length=512)
     rating = models.CharField(max_length=32)
     blurb = models.TextField()
-    image = models.ImageField(upload_to='title-images/', blank=True)
+    image = models.ImageField(upload_to=IMAGE_SUBDIRECTORY, blank=True)
     find_results = models.TextField()
     file_path = models.CharField(max_length=512)
     file_mtime = models.BigIntegerField()
@@ -58,9 +65,10 @@ def add_image_file(title_data_model: IMDBTitleSearchData, image_path: Path):
 
     :param image_path - path to locally saved image file
     """
-    with open(image_path, 'rb') as fp:
-        django_file = File(fp)
-        title_data_model.image.save(str(image_path.name), django_file, save=True)
+    if image_path.is_file():
+        with open(image_path, 'rb') as fp:
+            django_file = File(fp)
+            title_data_model.image.save(str(image_path.name), django_file, save=True)
 
 
 def update_image_file(title_data_model: IMDBTitleSearchData, image_path: Path):
@@ -68,11 +76,12 @@ def update_image_file(title_data_model: IMDBTitleSearchData, image_path: Path):
 
     :param image_path - path to locally saved image file
     """
-    with open(image_path, 'rb') as fp:
-        print(f'image_path: {image_path}')
-        django_file = File(fp)
-        if Path(title_data_model.image.path).exists():
-            print(f'deleting: {title_data_model.image.path}')
-            os.remove(title_data_model.image.path)
-            print(f'saving: {str(image_path.name)}')
-            title_data_model.image.save(str(image_path.name), django_file, save=True)
+    if image_path.is_file():
+        with open(image_path, 'rb') as fp:
+            print(f'image_path: {image_path}')
+            django_file = File(fp)
+            if Path(title_data_model.image.path).exists():
+                print(f'deleting: {title_data_model.image.path}')
+                os.remove(title_data_model.image.path)
+                print(f'saving: {str(image_path.name)}')
+                title_data_model.image.save(str(image_path.name), django_file, save=True)

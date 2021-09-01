@@ -6,8 +6,10 @@ import re
 from django.test import TestCase
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db.models import Field
 
-from imdb_info_local.models import IMDBTitleSearchData
+from imdb_info_local.models import (IMDBTitleSearchData, add_image_file,
+                                    update_image_file, NON_EXISTENT_PATH)
 from imdb_info_local.imdb import IMDBTitleData
 
 
@@ -44,6 +46,17 @@ class IMDBTitleSearchDataTests(TestCase):
             type=IMDBTitleSearchData.TV,
             find_results='<ul><li><a href="https://www.imdb.com//title/tt1486217/">Archer (2009) (TV Series)</a></li>\n<li><a href="https://www.imdb.com//title/tt0060490/">Harper (1966) aka "Archer"</a></li>\n</ul>',
             file_path='/Volumes/dr-wd-2/tv/Archer',
+            file_mtime=1604372147,
+            file_ctime=1604372147,
+        )
+        cls.title_no_info = IMDBTitleSearchData.objects.create(
+            title='Citizen Four Snowden Poitras',
+            rating='N/A',
+            blurb='No title found in search',
+            image=None,
+            type=IMDBTitleSearchData.TV,
+            find_results='<ul></ul>',
+            file_path='/Volumes/dr-wd-2/movies/Citizen-Four-Snowden-Poitras',
             file_mtime=1604372147,
             file_ctime=1604372147,
         )
@@ -135,3 +148,17 @@ class IMDBTitleSearchDataTests(TestCase):
                                     content_type='application/json')
         self.assertEqual(response.content,
                          b'{"error": "Either no match in db or more than 1 title for video type.  Check the README.md for requirements."}')
+
+    def test_add_image_with_no_image_file_saved(self):
+        try:
+            add_image_file(self.title_no_info, NON_EXISTENT_PATH)
+        except Exception as e:
+            print(f'exception: {e}')
+            self.fail('add_image_file did not handle nonexistent path')
+
+    def test_update_image_with_no_image_file_saved(self):
+        try:
+            update_image_file(self.title_no_info, NON_EXISTENT_PATH)
+        except Exception as e:
+            print(f'exception: {e}')
+            self.fail('update_image_file did not handle nonexistent path')
