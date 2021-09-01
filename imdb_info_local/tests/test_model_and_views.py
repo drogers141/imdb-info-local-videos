@@ -156,9 +156,23 @@ class IMDBTitleSearchDataTests(TestCase):
             print(f'exception: {e}')
             self.fail('add_image_file did not handle nonexistent path')
 
+    def test_add_image_with_image_file_value_None(self):
+        try:
+            add_image_file(self.title_no_info, None)
+        except Exception as e:
+            print(f'exception: {e}')
+            self.fail('add_image_file did not handle image value of None')
+
     def test_update_image_with_no_image_file_saved(self):
         try:
             update_image_file(self.title_no_info, NON_EXISTENT_PATH)
         except Exception as e:
             print(f'exception: {e}')
             self.fail('update_image_file did not handle nonexistent path')
+
+    def test_update_image_with_no_image_value_None(self):
+        try:
+            update_image_file(self.title_no_info, None)
+        except Exception as e:
+            print(f'exception: {e}')
+            self.fail('update_image_file did not handle image value of None')
