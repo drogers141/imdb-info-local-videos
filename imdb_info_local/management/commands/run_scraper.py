@@ -51,7 +51,7 @@ def get_imdb_title_data(title: str) -> IMDBTitleSearchResults:
         return IMDBTitleSearchResults(
             title=title,
             find_results=search_results,
-            title_data= IMDBTitleData('N/A', 'No titles found in search')
+            title_data= IMDBTitleData('N/A', 'No titles found in search', Path('/tmp/not-there'))
         )
 
 

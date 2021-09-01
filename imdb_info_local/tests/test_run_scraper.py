@@ -42,7 +42,7 @@ class RunScraperNoDBTests(SimpleTestCase):
         expected = IMDBTitleSearchResults(
             title='Unknown Title',
             find_results=[],
-            title_data=IMDBTitleData('N/A', 'No titles found in search')
+            title_data=IMDBTitleData('N/A', 'No titles found in search', Path('/tmp/not-there'))
         )
         actual = get_imdb_title_data('Unknown Title')
         self.assertEqual(expected.title, actual.title)
@@ -119,7 +119,8 @@ class RunScraperTests(TestCase):
             find_results=fleabag_search_results,
             title_data=IMDBTitleData(
                 rating='8.7/10',
-                blurb='A comedy series adapted from the award-winning play about a young woman trying to cope with life in London whilst coming to terms with a recent tragedy.'
+                blurb='A comedy series adapted from the award-winning play about a young woman trying to cope with life in London whilst coming to terms with a recent tragedy.',
+                image_file=Path('/tmp/archer.jpg')
             )
         )
         fleabag_dir = self.tv_dir.joinpath('Fleabag')
@@ -146,7 +147,8 @@ class RunScraperTests(TestCase):
             find_results=fleabag_search_results,
             title_data=IMDBTitleData(
                 rating='8/10',
-                blurb='There should be an Archer movie anyway.'
+                blurb='There should be an Archer movie anyway.',
+                image_file=Path('/tmp/archer.jpg')
             )
         )
         movie_dir = DATA_DIR.joinpath('movies')
