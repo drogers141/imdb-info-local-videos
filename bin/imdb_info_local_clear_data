@@ -5,7 +5,9 @@ read -p 'Clear all tv shows and movies from the db and all image files? [Yy] ' c
 if [[ $choice == 'Y' || $choice == 'y' ]]
 then
     echo 'Clearing all stored data...'
-    cd ..
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    cd $(dirname "${SCRIPT_DIR}") || exit
+
     pipenv run python manage.py clear_data
 else
     echo 'Not clearing data...'
