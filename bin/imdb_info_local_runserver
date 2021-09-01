@@ -1,0 +1,6 @@
+#!/bin/bash
+# run the site on local server port 8002
+
+cd ..
+echo 'imdb info for local videos running at http://localhost:8002/'
+pipenv run python manage.py runserver 8002

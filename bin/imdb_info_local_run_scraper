@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo 'running scraper for tv and movie dirs in settings'
+echo 'see manage.py run_scraper -h for other usage'
+
+cd ..
+pipenv run python manage.py run_scraper

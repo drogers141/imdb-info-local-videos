@@ -1,0 +1,15 @@
+#!/bin/bash
+
+read -p 'Clear all tv shows and movies from the db and all image files? [Yy] ' choice
+
+if [[ $choice == 'Y' || $choice == 'y' ]]
+then
+    echo 'Clearing all stored data...'
+    cd ..
+    pipenv run python manage.py clear_data
+else
+    echo 'Not clearing data...'
+fi
+
+
+
