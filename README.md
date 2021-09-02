@@ -21,6 +21,13 @@ ends with the year as shown in IMdb as it will help that the algorithm picks the
 /path/to/tv/Fleabag
 ```
 
+### Update to above
+
+Now you can run the management command ```run_scraper``` with an argument of any directory and the type
+of title - tv or movie.  However if you stick to the config method above - and the instructions below,
+running the scraper will sync the website to the movie and tv directories' contents.  That is it removes
+any titles from the database that are no longer in the directory.
+
 ## Setup
 This is a Django application, so config is in a settings.py file.  In this case it is:
 ```
@@ -41,7 +48,7 @@ create_db
 ```
 You can also change the database settings in the settings.py of course if you know how.
 
-Initiate a python virtual environment and install the dependencies:
+The project uses pipenv to manage python dependencies. So from the root directory run:
 ```
 # install pipenv in your system (see pipenv docs)
 pip install pipenv
@@ -53,21 +60,36 @@ pipenv install
 ```
 
 ## Running
-As well there are no bin scripts yet, so to run the scraping and inserting of objects into the db cd to the
-root directory and run:
+There are scripts in the bin/ directory to run the scraper, the webserver, and clearing all data from
+the system, so add the bin/ directory to your PATH.
+
+Run the scraper or clear all data from scripts:
 ```
-pipenv run python manage.py run_scraper
+bin/imdb_info_local_run_scraper
+
+bin/imdb_info_local_clear_data
 ```
-Run that anytime video titles are added or removed.
+
+Run the django management commands directly from the root dir:
+```
+# see options for scraper
+pipenv run python manage.py run_scraper -h
+
+# clear data is straightforward
+pipenv run python manage.py clear_data
+
+```
+Run the scraper any time videos are added or removed from the specified directories to remain in sync.
+Or run it with params to add videos from other dirs.
 
 Run the website:
 ```
+# script runs on localhost:8002
+bin/imdb_info_local_runserver
+
+# or directly
 pipenv python manage.py runserver [port]
 ```
-
-Website will be at http://localhost:8000/movies/ or different port as specified.
-
-The frontend is still being worked on.
 
 Navigation at the top right of the page shows pages available:
 
@@ -76,5 +98,6 @@ Navigation at the top right of the page shows pages available:
 - Movies mtime - movies ordered by most recently added (file mtime of the directory holding the movie)
 - TV mtime - tv series ordered by most recently added
 
-if you click the ratings/title area for a title, the list of titles
-found in the title search will be shown in case the wrong title was picked.
+If you click the ratings/title area for a title, the list of titles
+found in the title search will be shown in case the wrong title was picked. You can update with one of
+the listed title urls or enter a title url in the bottom to update the info.
