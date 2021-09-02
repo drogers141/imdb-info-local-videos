@@ -176,3 +176,10 @@ class IMDBTitleSearchDataTests(TestCase):
         except Exception as e:
             print(f'exception: {e}')
             self.fail('update_image_file did not handle image value of None')
+
+    def test_update_image_with_image_value_None_but_valid_local_image(self):
+        try:
+            update_image_file(self.title_no_info, DATA_DIR / 'archer.jpg')
+        except Exception as e:
+            print(f'exception: {e}')
+            self.fail('update_image_file did not handle image value of None with valid local image')

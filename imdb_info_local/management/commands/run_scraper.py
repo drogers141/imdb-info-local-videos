@@ -187,7 +187,6 @@ class Command(BaseCommand):
             added_movies = process_directory(Path(dir_), type_)
             if added_movies:
                 logger.info(f'Added movies: {added_movies}')
-            logger.info('No movies removed when called with arguments.')
             self.stdout.write('Also - as the program currently behaves, any titles in directories not in the standard tv ' +
                         'or movie directories (in settings.py) will be removed from the database when running the ' +
                         'standard run_scraper command with no arguments.')
@@ -208,5 +207,5 @@ class Command(BaseCommand):
                 logger.info(f'Added movies: {added_movies}')
             if added_tv:
                 logger.info(f'Added tv: {added_tv}')
-            if not removed_movies or removed_tv or added_movies or added_tv:
+            if not (removed_movies or removed_tv or added_movies or added_tv):
                 logger.info('No movie or tv titles added or removed')

@@ -12,6 +12,13 @@
                  data-video-type="{{ title.type }}"
                  data-update-url="{% url 'title_update' %}"
             >
+                <div class="title-image">
+                    {% if not title.image %}
+                        <img src="{% static 'imdb_info_local/futurama-fry.jpg' %}" height="76.8px" width="51.9px">
+                    {% else %}
+                        <img src="{{ title.image.url }}" height="76.8px">
+                    {% endif %}
+                </div>
                 <div class="title-rating">
                     <p>{{ title.rating }} - {{ title.title }}</p>
                 </div>

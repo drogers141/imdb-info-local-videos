@@ -63,6 +63,7 @@ class IMDBTitleSearchData(models.Model):
 def add_image_file(title_data_model: IMDBTitleSearchData, image_path: Path):
     """Add the image file to the model
 
+    :param title_data_model - model to update
     :param image_path - path to locally saved image file
     """
     if image_path and image_path.is_file():
@@ -74,14 +75,12 @@ def add_image_file(title_data_model: IMDBTitleSearchData, image_path: Path):
 def update_image_file(title_data_model: IMDBTitleSearchData, image_path: Path):
     """Update the image file for the model
 
+    :param title_data_model - model to update
     :param image_path - path to locally saved image file
     """
     if image_path and image_path.is_file():
         with open(image_path, 'rb') as fp:
-            print(f'image_path: {image_path}')
             django_file = File(fp)
-            if Path(title_data_model.image.path).exists():
-                print(f'deleting: {title_data_model.image.path}')
+            if title_data_model.image and Path(title_data_model.image.path).exists():
                 os.remove(title_data_model.image.path)
-                print(f'saving: {str(image_path.name)}')
-                title_data_model.image.save(str(image_path.name), django_file, save=True)
+            title_data_model.image.save(str(image_path.name), django_file, save=True)

@@ -50,12 +50,10 @@ def update_title_data(request):
         new_title_data = imdb_title_data(title_url)
         target.rating = new_title_data.rating
         target.blurb = new_title_data.blurb
-        print(f'target.image.url: {target.image.url}')
-
-        # target.image = add_image_file(target, new_title_data.image_file)
+        print(f'image_file (url): {new_title_data.image_file}')
         update_image_file(target, new_title_data.image_file)
         target.save()
-        print(f'new target.image.url: {target.image.url}')
+        image_url = target.image.url if target.image else ''
         return_data = {
             'rating': new_title_data.rating,
             'blurb': new_title_data.blurb,
