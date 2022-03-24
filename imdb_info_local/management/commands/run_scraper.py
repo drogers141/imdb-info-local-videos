@@ -70,13 +70,13 @@ def remove_title_data_for_deleted_files(directory: Path, type: str='movie') -> [
     :param type - 'movie', or 'tv'
     :return - list of titles removed
     """
+    if not directory.is_dir():
+        logger.error(f'Not removing titles: directory does not exist: {directory.as_posix()}')
+        return []
     video_title_dirs = directory.glob('*')
     video_titles = [t.name.replace('-', ' ') for t in video_title_dirs]
-    # print(f"video title dirs:\n{[v for v in video_title_dirs]}")
-    # print(f"video titles:\n{video_titles}")
 
     removed = []
-    title_type = None
     if type == 'movie':
         title_type = IMDBTitleSearchData.MOVIE
     elif type == 'tv':
@@ -128,6 +128,10 @@ def process_directory(directory: Path, title_type: str = 'movie'):
     :return - list of titles added
     """
     assert title_type in ('tv', 'movie'), 'title_type must be "movie" or "tv"'
+
+    if not directory.is_dir():
+        logger.error(f'Not adding titles: directory does not exist: {directory.as_posix()}')
+        return []
 
     added = []
     title_subdirs = [d for d in directory.glob('*')]

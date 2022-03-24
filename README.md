@@ -1,16 +1,15 @@
 # IMdb Info for Local Videos
 
-This is a website meant to work on a local machine where you have movies and tv series on disk and want
-ratings and summaries available for them.
-
-It is probably just for me.  So I'm writing this to remember it a bit.
+This is a website meant to work on a local machine where you have movies and tv series on disk or on 
+the computer and want ratings and summaries available for them. 
 
 ## Requirements
 
-The site assumes that there is one directory containing movie videos, and one directory containing tv 
+The site works best if there is one directory containing movie videos, and one directory containing tv 
 series.  Within each directory each title must have its video or series of videos in a directory with
 the title in title capitalization with dashes delimiting each word.  It is recommended that the title
-ends with the year as shown in IMdb as it will help that the algorithm picks the right title.
+ends with the year as shown in IMdb as it will help that the algorithm picks the right title, but this
+is not necessary.
 ```
 /path/to/movies/Black-Widow-2021
 /path/to/movies/Blade-Runner-1982
@@ -51,8 +50,6 @@ You can also change the database settings in the settings.py of course if you kn
 The project uses pipenv to manage python dependencies. So from the root directory run:
 ```
 # install pipenv in your system (see pipenv docs)
-pip install pipenv
-or 
 pip install --user pipenv
 
 # create virtual environment and install deps

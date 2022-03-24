@@ -99,6 +99,10 @@ function refreshRatingAndBlurb(title, titleContentDiv, newRating, newBlurb) {
 function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleContentDiv, loadBtn) {
     console.log(`url: ${imdbTitleUrl}  title: ${title} type: ${videoType}`);
     let csrftoken = getCookie('csrftoken');
+    console.log(`csrftoken: ${csrftoken}`)
+    // if (csrftoken === null) {
+    //     alert('The csrftoken is null - cookies must be allowed. (Private window?)');
+    // }
     handleLoadingDisplay(loadBtn);
     const timeLimit = 10000;
     const controller = new AbortController();
@@ -124,7 +128,11 @@ function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleContentDiv, 
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error(`${response.status}: ${response.statusText}`);
+                if (response.status === 403 && csrftoken === null) {
+                    throw new Error('403: The csrftoken is null - cookies must be allowed. (Private window?)');
+                } else {
+                    throw new Error(`${response.status}: ${response.statusText}`);
+                }
             }
             return response.json()
         })
@@ -140,7 +148,7 @@ function postUpdate(title, updateUrl, imdbTitleUrl, videoType, titleContentDiv, 
             if (error.name === 'AbortError') {
                 alert('Timeout updating from IMdb.');
             } else {
-                alert(`Error: ${error}`);
+                alert(error);
             }
         })
         .finally(() => handleLoadingDisplay(loadBtn));
