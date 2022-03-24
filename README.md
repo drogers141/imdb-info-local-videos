@@ -1,7 +1,8 @@
 # IMdb Info for Local Videos
 
 This is a website meant to work on a local machine where you have movies and tv series on disk or on 
-the computer and want ratings and summaries available for them. 
+the computer and want IMdb ratings and summaries available for them.  It is implemented as a Django
+application, and is not secured for remote deployment.
 
 ## Requirements
 
