@@ -9,7 +9,7 @@ application, and is not secured for remote deployment.
 The site works best if there is one directory containing movie videos, and one directory containing tv 
 series.  Within each directory each title must have its video or series of videos in a directory with
 the title in title capitalization with dashes delimiting each word.  It is recommended that the title
-ends with the year as shown in IMdb as it will help that the algorithm picks the right title, but this
+ends with the year as shown in IMdb as it will help the algorithm pick the right title, but this
 is not necessary.
 ```
 /path/to/movies/Black-Widow-2021
@@ -24,7 +24,7 @@ is not necessary.
 ### Update to above
 
 Now you can run the management command ```run_scraper``` with an argument of any directory and the type
-of title - tv or movie.  However if you stick to the config method above - and the instructions below,
+of title - tv or movie.  However, if you stick to the config method above - and the instructions below,
 running the scraper will sync the website to the movie and tv directories' contents.  That is it removes
 any titles from the database that are no longer in the directory.
 
@@ -68,7 +68,7 @@ bin/imdb_info_local_run_scraper
 bin/imdb_info_local_clear_data
 ```
 
-Run the django management commands directly from the root dir:
+You can also run the django management commands directly from the root dir:
 ```
 # see options for scraper
 pipenv run python manage.py run_scraper -h
@@ -96,6 +96,7 @@ Navigation at the top right of the page shows pages available:
 - Movies mtime - movies ordered by most recently added (file mtime of the directory holding the movie)
 - TV mtime - tv series ordered by most recently added
 
-If you click the ratings/title area for a title, the list of titles
-found in the title search will be shown in case the wrong title was picked. You can update with one of
+The website allows you to correct the rating and summary for a title if the wrong one was chosen by the
+algorithm.  If you click the ratings/title area for a title, the list of titles
+found in the title search will be shown. You can update with one of
 the listed title urls or enter a title url in the bottom to update the info.
