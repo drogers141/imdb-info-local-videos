@@ -92,7 +92,7 @@ function refreshRatingAndBlurb(title, titleContentDiv, newRating, newBlurb) {
     titleRatingDiv.appendChild(titleRatingP);
     blurbDiv.removeChild(blurbDiv.firstElementChild);
     let blurbP = document.createElement('p');
-    blurbP.textContent = newBlurb;
+    blurbP.innerHTML = newBlurb;
     blurbDiv.appendChild(blurbP);
 }
 
