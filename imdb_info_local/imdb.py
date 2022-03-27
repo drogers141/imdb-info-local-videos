@@ -74,9 +74,9 @@ def imdb_title_data(title_url: str) -> IMDBTitleData:
     :return IMDBTitleData - ie - rating and blurb (summary)
     """
     soup = parse_html_for_url(title_url)
-    ratings_div = soup.find('div', class_=re.compile('^AggregateRatingButton__Rating.*'))
+    ratings_div = soup.find('div', attrs={'data-testid': "hero-rating-bar__aggregate-rating__score"})
     rating = ratings_div.text if ratings_div else 'N/A'
-    plot_p = soup.find('span', class_=re.compile('^GenresAndPlot__TextContainerBreakpointXL.*'))
+    plot_p = soup.find('span', attrs={'data-testid': 'plot-l'})
     if plot_p and plot_p.text:
         blurb = plot_p.text
     else:

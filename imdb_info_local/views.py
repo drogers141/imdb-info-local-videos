@@ -53,7 +53,6 @@ def update_title_data(request):
         print(f'image_file (url): {new_title_data.image_file}')
         update_image_file(target, new_title_data.image_file)
         target.save()
-        image_url = target.image.url if target.image else ''
         return_data = {
             'rating': new_title_data.rating,
             'blurb': new_title_data.blurb,
