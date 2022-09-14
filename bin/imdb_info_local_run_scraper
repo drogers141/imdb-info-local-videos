@@ -4,6 +4,6 @@ echo 'running scraper for tv and movie dirs in settings'
 echo 'use run_scraper -h for other usage'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $(dirname "${SCRIPT_DIR}") || exit
-
+cd "$(dirname "${SCRIPT_DIR}")" || exit
+pwd
 pipenv run python manage.py run_scraper "$@"

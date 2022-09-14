@@ -61,13 +61,6 @@ class IMDBTitleSearchDataTests(TestCase):
             file_ctime=1604372147,
         )
 
-    def cleanup_image_files(self):
-        # call this from the last test
-        # cleanup image files one time rather than recreating for each test
-        # less performance hit
-        os.remove(self.tv.image.path)
-        os.remove(self.movie.image.path)
-
     def test_model(self):
         self.assertEqual(self.movie.verbose_str(),
                          'The Corporation 2003\nrating: 8.0/10 - type: MO\nDocumentary that looks at the concept of the corporation throughout recent history up to its present-day dominance.\nfind_results:\n<ul><li><a href="https://www.imdb.com//title/tt0379225/">The Corporation (2003)</a></li>\n<li><a href="https://www.imdb.com//title/tt5616634/">The Corporation (in development)</a></li>\n</ul>')
