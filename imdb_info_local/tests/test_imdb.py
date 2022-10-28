@@ -6,13 +6,15 @@ from bs4 import BeautifulSoup
 
 from imdb_info_local.imdb import (imdb_title_data, imdb_title_search_results, imdb_title_image_file,
                                   IMDBFindTitleResult, IMDBTitleData)
-from .nondb_fixtures import archer_find_title_result, archer_title_data
+from .nondb_fixtures import (archer_find_title_result, archer_title_data,
+                             archer_find_title_alt_html_format_result)
 
-DATA_DIR = Path(__file__).parent.joinpath('data')
+DATA_DIR = Path(__file__).parent / 'data'
 
 
 def soup_from_local_file(path):
-    return BeautifulSoup(open(path).read(), 'html.parser')
+    with open(path) as instream:
+        return BeautifulSoup(instream.read(), 'html.parser')
 
 
 class IMDBScrapingTests(TestCase):
@@ -34,6 +36,16 @@ class IMDBScrapingTests(TestCase):
         )
         title_search_results = imdb_title_search_results('Looney Tunes Golden Collection')
         self.assertEqual(len(title_search_results), 0)
+
+    @patch('imdb_info_local.imdb.parse_html_for_url')
+    def test_imdb_title_search_results_alt_html_format(self, mock_soup):
+        mock_soup.return_value = soup_from_local_file(
+            DATA_DIR.joinpath('imdb-search-archer-alt-html-format.html')
+        )
+        title_search_results = imdb_title_search_results('Archer')
+        self.assertEqual(len(title_search_results), 5)
+        self.assertEqual(title_search_results[0], archer_find_title_alt_html_format_result)
+
 
     @patch('imdb_info_local.imdb.imdb_title_image_file')
     @patch('imdb_info_local.imdb.parse_html_for_url')

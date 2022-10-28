@@ -136,7 +136,9 @@ class RunScraperTests(TestCase):
 
     @patch('imdb_info_local.management.commands.run_scraper.get_imdb_title_data')
     def test_process_dir_movie_where_title_exists_for_tv(self, get_imdb_title_data_mock):
-        """Ensure we insert a movie if there is the same title, but tv series"""
+        """Ensure we insert a movie if there is the same title tv show,
+        but we do not insert a tv show if there is one with the same name
+        """
         # it is fine for a movie and tv show to have the same name
         # again - this constraint is also down to my usage as consisting
         # of all movies in one dir and all tv in another dir
