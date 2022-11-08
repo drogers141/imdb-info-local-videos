@@ -78,23 +78,14 @@ def remove_title_data_for_deleted_files(directory: Path, title_type: str='MO') -
     video_title_dirs = [file for file in directory.iterdir() if file.is_dir()]
     removed = []
 
-
-    # for title in video_title_dirs:
-    #     print(title.resolve())
-
     title_paths_in_dir = set([str(title.resolve()) for title in video_title_dirs])
-    # print(f'{title_paths_in_dir = }\n')
     paths_and_titles_in_db = {title_data.file_path: title_data
                               for title_data
                               in IMDBTitleSearchData.objects.filter(type=title_type)
                               if title_data.file_path.startswith(str(directory))}
-    # print(f'{titles_and_paths_for_dir_in_db = }\n')
-    # keys = set(titles_and_paths_for_dir_in_db.keys())
-    # print(f'{keys = }\n')
     titles_in_db_not_in_dir = set(paths_and_titles_in_db.keys()) - title_paths_in_dir
-    # print(f'titles_in_db_not_in_dir:')
+
     for title_path in titles_in_db_not_in_dir:
-        # print(title_path, ':', paths_and_titles_in_db[title_path])
         paths_and_titles_in_db[title_path].delete()
         removed.append(paths_and_titles_in_db[title_path].title)
 
