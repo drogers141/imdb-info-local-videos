@@ -6,15 +6,12 @@ from bs4 import BeautifulSoup
 
 from imdb_info_local.imdb import (imdb_title_data, imdb_title_search_results, imdb_title_image_file,
                                   IMDBFindTitleResult, IMDBTitleData)
+from imdb_info_local.utils import soup_from_local_file
 from .nondb_fixtures import (archer_find_title_result, archer_title_data,
                              archer_find_title_alt_html_format_result)
 
 DATA_DIR = Path(__file__).parent / 'data'
 
-
-def soup_from_local_file(path):
-    with open(path) as instream:
-        return BeautifulSoup(instream.read(), 'html.parser')
 
 
 class IMDBScrapingTests(TestCase):

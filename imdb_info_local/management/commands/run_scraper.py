@@ -9,7 +9,7 @@ from django.core.files import File
 
 from rich.progress import track
 
-from imdb_info_local.models import IMDBTitleSearchData, add_image_file, NON_EXISTENT_PATH
+from imdb_info_local.models import IMDBTitleSearchData, add_image_file, NONEXISTENT_PATH
 from imdb_info_local.imdb import (imdb_title_search_results, imdb_title_data,
                                   IMDBTitleData, IMDBFindTitleResult)
 
@@ -51,7 +51,7 @@ def get_imdb_title_data(title: str) -> IMDBTitleSearchResults:
         return IMDBTitleSearchResults(
             title=title,
             find_results=search_results,
-            title_data= IMDBTitleData('N/A', 'No titles found in search', NON_EXISTENT_PATH)
+            title_data= IMDBTitleData('N/A', 'No titles found in search', NONEXISTENT_PATH)
         )
 
 
@@ -63,37 +63,45 @@ def find_results_html(find_results: [IMDBFindTitleResult]) -> str:
     return html
 
 
-def remove_title_data_for_deleted_files(directory: Path, type: str='movie') -> [str]:
+def remove_title_data_for_deleted_files(directory: Path, title_type: str='MO') -> [str]:
     """Remove unneeded title data model objects
 
     :param directory - path to directory holding videos
-    :param type - 'movie', or 'tv'
+    :param title_type - 'MO' for movies, or 'TV' for tv shows
     :return - list of titles removed
     """
     if not directory.is_dir():
-        logger.error(f'Not removing titles: directory does not exist: {directory.as_posix()}')
+        logger.info(f'Not removing titles: directory does not exist: {str(directory.resolve())}')
         return []
-    video_title_dirs = directory.glob('*')
-    video_titles = [t.name.replace('-', ' ') for t in video_title_dirs]
+    assert title_type in ('MO', 'TV'), 'wrong title type'
 
+    video_title_dirs = [file for file in directory.iterdir() if file.is_dir()]
     removed = []
-    if type == 'movie':
-        title_type = IMDBTitleSearchData.MOVIE
-    elif type == 'tv':
-        title_type = IMDBTitleSearchData.TV
-    else:
-        raise Exception(f'type: {type} not movie or tv')
 
-    for titleData in IMDBTitleSearchData.objects.filter(type=title_type):
-        if titleData.title not in video_titles:
-            logger.debug(f'titleData {titleData} not in directory: {directory} - removing')
-            removed.append(titleData.title)
-            titleData.delete()
+
+    # for title in video_title_dirs:
+    #     print(title.resolve())
+
+    title_paths_in_dir = set([str(title.resolve()) for title in video_title_dirs])
+    # print(f'{title_paths_in_dir = }\n')
+    paths_and_titles_in_db = {title_data.file_path: title_data
+                              for title_data
+                              in IMDBTitleSearchData.objects.filter(type=title_type)
+                              if title_data.file_path.startswith(str(directory))}
+    # print(f'{titles_and_paths_for_dir_in_db = }\n')
+    # keys = set(titles_and_paths_for_dir_in_db.keys())
+    # print(f'{keys = }\n')
+    titles_in_db_not_in_dir = set(paths_and_titles_in_db.keys()) - title_paths_in_dir
+    # print(f'titles_in_db_not_in_dir:')
+    for title_path in titles_in_db_not_in_dir:
+        # print(title_path, ':', paths_and_titles_in_db[title_path])
+        paths_and_titles_in_db[title_path].delete()
+        removed.append(paths_and_titles_in_db[title_path].title)
 
     return removed
 
 
-def process_directory(directory: Path, title_type: str = 'movie'):
+def process_directory(directory: Path, title_type: str = 'MO'):
     """Processes filepaths in directory.
 
     For each file:
@@ -101,11 +109,11 @@ def process_directory(directory: Path, title_type: str = 'movie'):
     * extracts title name
     * checks if the title is not already in the db (title and type (tv, movie) have to be
       the same to reject)
-    * if not scrapes IMDB for rating and blurb
+    * if not, scrapes IMDB for rating and blurb
     * saves as Model into db.
 
     It is assumed that all titles in `directory` are of type `type`.
-    It is assumed that each title - ie movie or tv series - is in it's own
+    It is assumed that each title - ie movie or tv series - is in its own
     directory, with hyphen delimited names.  And best to end with the year.
     Examples:
     Star-Trek-Beyond-2016
@@ -124,34 +132,32 @@ def process_directory(directory: Path, title_type: str = 'movie'):
     It's more important to get the right IMdb info.
 
     :param directory - path to directory holding videos
-    :param title_type - 'movie', or 'tv'
+    :param title_type - 'MO' for movies, or 'TV' for tv shows
     :return - list of titles added
     """
-    assert title_type in ('tv', 'movie'), 'title_type must be "movie" or "tv"'
-
     if not directory.is_dir():
-        logger.error(f'Not adding titles: directory does not exist: {directory.as_posix()}')
+        logger.info(f'Not adding titles: directory does not exist: {str(directory.resolve())}')
         return []
+    assert title_type in ('MO', 'TV'), 'wrong title type'
 
     added = []
-    title_subdirs = [d for d in directory.glob('*')]
+    title_subdirs = [d for d in directory.iterdir() if d.is_dir()]
 
     for subdir in track(title_subdirs, description=f'Processing {title_type} titles...'):
         try:
             logger.debug(f'processing: {subdir}')
-            path = subdir.as_posix()
-            type_ = IMDBTitleSearchData.TV if title_type == 'tv' else IMDBTitleSearchData.MOVIE
+            path = subdir.resolve()
             mtime = int(subdir.stat().st_mtime)
             ctime = int(subdir.stat().st_ctime)
             logger.debug(f'path: {path}\nmtime: {mtime}, ctime: {ctime}')
             title = subdir.name.replace('-', ' ')
 
-            if not IMDBTitleSearchData.objects.filter(title=title, type=type_):
+            if not IMDBTitleSearchData.objects.filter(title=title, type=title_type):
                 title_search_results = get_imdb_title_data(title)
                 logger.debug(f'title data: {title_search_results}')
                 title_data_instance = IMDBTitleSearchData(
                     title=title,
-                    type=type_,
+                    type=title_type,
                     rating=title_search_results.title_data.rating,
                     blurb=title_search_results.title_data.blurb,
                     find_results=find_results_html(title_search_results.find_results),
@@ -164,7 +170,7 @@ def process_directory(directory: Path, title_type: str = 'movie'):
                 added.append(title)
                 time.sleep(1)
             else:
-                logger.debug(f'title of same type exists: {title} type: {type_}')
+                logger.debug(f'title of same type exists: {title} type: {title_type}')
         except Exception as e:
             logger.error(f'Exception handling dir: {subdir}')
             raise
@@ -177,31 +183,34 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('-d', '--dir', help='Get titles from this directory.')
-        parser.add_argument('-t', '--type', help='Use with -d, --dir, specify video type in ' +
-                                                 'directory -- "tv" or "movie"')
+        parser.add_argument('-t', '--type', help='Use with -d, --dir, specify video type in directory -- ' +
+                                                 '"TV" for tv shows, or "MO" for movies')
 
     def handle(self, *args, **options):
         dir_ = options.get('dir')
-        type_ = options.get('type')
-        if dir_ or type_:
-            if not (dir_ and type_):
-                logger.error(f'Type must be specified with directory option: dir: {dir_}, type: {type_}')
+        title_type = options.get('type')
+        if dir_ or title_type:
+            assert title_type in ('MO', 'TV'), 'wrong title type'
+            if not (dir_ and title_type):
+                logger.error(f'Type must be specified with directory option: dir: {dir_}, type: {title_type}')
                 return
 
-            added_movies = process_directory(Path(dir_), type_)
+            added_movies = process_directory(Path(dir_), title_type)
             if added_movies:
                 logger.info(f'Added movies: {added_movies}')
-            self.stdout.write('Also - as the program currently behaves, any titles in directories not in the standard tv ' +
-                        'or movie directories (in settings.py) will be removed from the database when running the ' +
-                        'standard run_scraper command with no arguments.')
-
         else:
 
-            removed_movies = remove_title_data_for_deleted_files(Path(settings.MOVIE_DIRECTORY), 'movie')
-            removed_tv = remove_title_data_for_deleted_files(Path(settings.TV_DIRECTORY), 'tv')
+            removed_movies, removed_tv = [], []
+            for movie_dir in settings.IMDB_INFO_LOCAL_VIDEO_DIRS['Movies']:
+                removed_movies.extend(remove_title_data_for_deleted_files(Path(movie_dir), 'MO'))
+            for tv_dir in settings.IMDB_INFO_LOCAL_VIDEO_DIRS['TV']:
+                removed_tv.extend(remove_title_data_for_deleted_files(Path(tv_dir), 'TV'))
 
-            added_movies = process_directory(Path(settings.MOVIE_DIRECTORY), 'movie')
-            added_tv = process_directory(Path(settings.TV_DIRECTORY), 'tv')
+            added_movies, added_tv = [], []
+            for movie_dir in settings.IMDB_INFO_LOCAL_VIDEO_DIRS['Movies']:
+                added_movies.extend(process_directory(Path(movie_dir), 'MO'))
+            for tv_dir in settings.IMDB_INFO_LOCAL_VIDEO_DIRS['TV']:
+                added_tv.extend(process_directory(Path(tv_dir), 'TV'))
 
             if removed_movies:
                 logger.info(f'Removed movies: {removed_movies}')

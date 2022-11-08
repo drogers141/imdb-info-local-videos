@@ -4,41 +4,53 @@ This is a website meant to work on a local machine where you have movies and tv 
 the computer and want IMdb ratings and summaries available for them.  It is implemented as a Django
 application, and is not secured for remote deployment.
 
-## Requirements
+## Storage of tracked videos
 
-The site works best if there is one directory containing movie videos, and one directory containing tv 
-series.  Within each directory each title must have its video or series of videos in a directory with
-the title in title capitalization with dashes delimiting each word.  It is recommended that the title
+The site keeps track of a list of directories holding movies, and a list of directories holding tv
+shows.  Each video being tracked must have its own directory, named with the title of the video using
+title capitalization and delimited by dashes.  It is recommended that the title
 ends with the year as shown in IMdb as it will help the algorithm pick the right title, but this
 is not necessary.
+
+For example, if you had the following directories holding collections of videos:
 ```
-/path/to/movies/Black-Widow-2021
-/path/to/movies/Blade-Runner-1982
-/path/to/movies/Blade-Runner-2049-2017
+/path/to/movies-1
+/path/to/movies-2
+/path/to/tv-1
+```
+You could have tracked movies and tv shows in the following directories:
+```
+/path/to/movies-1/Black-Widow-2021
+/path/to/movies-1/Blade-Runner-1982
+/path/to/movies-2/Blade-Runner-2049-2017
 ...
-/path/to/tv/Archer
-/path/to/tv/Dead-Pixels-2019
-/path/to/tv/Fleabag
+/path/to/tv-1/Archer
+/path/to/tv-1/Dead-Pixels-2019
+/path/to/tv-1/Fleabag
 ```
 
-### Update to above
+### Syncing directories not configured
 
-Now you can run the management command ```run_scraper``` with an argument of any directory and the type
-of title - tv or movie.  However, if you stick to the config method above - and the instructions below,
-running the scraper will sync the website to the movie and tv directories' contents.  That is it removes
-any titles from the database that are no longer in the directory.
+You can also run the management command ```run_scraper``` with an argument of an arbitrary 
+directory and the type of title - tv or movie - to add videos to the database or to update.
 
 ## Setup
 This is a Django application, so config is in a settings.py file.  In this case it is:
 ```
 config/settings.py
 ```
-Set the tv and movie directory variables to your needs:
+Create a dictionary IMDB_INFO_LOCAL_VIDEO_DIRS containing a list of movie and tv directories.  
+Following the above:
 ```
-# Directories where tv and movie files are located
-TV_DIRECTORY = '/Volumes/dr-wd-2/tv'
-MOVIE_DIRECTORY = '/Volumes/dr-wd-2/movies'
-
+IMDB_INFO_LOCAL_VIDEO_DIRS = {
+    'TV': [
+        '/path/to/tv-1',
+    ],
+    'Movies': [
+        '/path/to/movies-1',
+        '/path/to/movies-2',
+    ]
+}
 ```
 
 For now this is not dockerized, so a postgresql database needs to be installed and you must have access 

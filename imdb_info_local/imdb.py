@@ -7,20 +7,9 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
+from .utils import parse_html_for_url
+
 logger = logging.getLogger(__name__)
-
-# Oct 26, 2022 - may need to update
-# Use this user agent to ensure the page we scrape is roughly as expected
-FIREFOX_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:106.0) Gecko/20100101 Firefox/106.0'
-
-
-def parse_html_for_url(url):
-    r = requests.get(
-        url,
-        headers={'User-Agent': FIREFOX_USER_AGENT}
-    )
-    soup = BeautifulSoup(r.content, 'html.parser')
-    return soup
 
 
 @dataclass
@@ -66,20 +55,22 @@ def imdb_title_search_results(title: str) -> [IMDBFindTitleResult]:
 
 
 def _title_search_results_alternate_html(title: str, section_soup) -> [IMDBFindTitleResult]:
-    """Updated Oct 2022 - requests scraper returns a different html format
-     - sometimes (even with Firefox user agent)
+    """Updated Oct 2022 - requests scraper often returns a different html format
+     - even with Firefox user agent
     """
     titles = []
-    li_tags = [tag for tag in section_soup.find('ul').children if tag.name == 'li']
-    logger.info(f'{title} - results section found - {len(li_tags)} li_tags')
-    for li_tag in li_tags:
-        img_url = _largest_image_from_img_tag(li_tag.find('img'))
-        if not img_url:
-            continue
-        title_url = _title_url_from_li_tag(li_tag)
-        text = re.sub(r'\s\s+', ' ', li_tag.text).strip()
-        # text = li_tag.text.replace('\n', '')
-        titles.append(IMDBFindTitleResult(img_url=img_url, title_url=title_url, text=text))
+    ul = section_soup.find('ul')
+    if ul:
+        li_tags = [tag for tag in ul.children if tag.name == 'li']
+        logger.info(f'{title} - results section found - {len(li_tags)} li_tags')
+        for li_tag in li_tags:
+            img_url = _largest_image_from_img_tag(li_tag.find('img'))
+            if not img_url:
+                continue
+            title_url = _title_url_from_li_tag(li_tag)
+            text = re.sub(r'\s\s+', ' ', li_tag.text).strip()
+            # text = li_tag.text.replace('\n', '')
+            titles.append(IMDBFindTitleResult(img_url=img_url, title_url=title_url, text=text))
     return titles
 
 def _largest_image_from_img_tag(img_tag: BeautifulSoup) -> str:

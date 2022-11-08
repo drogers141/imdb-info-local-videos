@@ -150,5 +150,12 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = str(BASE_DIR / 'media')
 
 # Directories where tv and movie files are located
-TV_DIRECTORY = '/Volumes/dr-wd-2/tv'
-MOVIE_DIRECTORY = '/Volumes/dr-wd-2/movies'
+IMDB_INFO_LOCAL_VIDEO_DIRS = {
+    'TV': [
+        '/Volumes/dr-wd-2/tv',
+        '/Volumes/dr-wd-1/tv'
+    ],
+    'Movies': [
+        '/Volumes/dr-wd-2/movies',
+    ]
+}

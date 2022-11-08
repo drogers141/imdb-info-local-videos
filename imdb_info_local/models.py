@@ -9,7 +9,7 @@ from django.core.files import File
 IMAGE_SUBDIRECTORY = 'title-images/'
 
 # sentinel for a path when no image is saved locally
-NON_EXISTENT_PATH = Path('/this path must not exist')
+NONEXISTENT_PATH = Path('/this path must not exist')
 
 
 class IMDBTitleSearchData(models.Model):

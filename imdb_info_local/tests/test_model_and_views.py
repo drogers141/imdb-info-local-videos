@@ -9,7 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Field
 
 from imdb_info_local.models import (IMDBTitleSearchData, add_image_file,
-                                    update_image_file, NON_EXISTENT_PATH)
+                                    update_image_file, NONEXISTENT_PATH)
 from imdb_info_local.imdb import IMDBTitleData
 
 
@@ -144,7 +144,7 @@ class IMDBTitleSearchDataTests(TestCase):
 
     def test_add_image_with_no_image_file_saved(self):
         try:
-            add_image_file(self.title_no_info, NON_EXISTENT_PATH)
+            add_image_file(self.title_no_info, NONEXISTENT_PATH)
         except Exception as e:
             print(f'exception: {e}')
             self.fail('add_image_file did not handle nonexistent path')
@@ -158,7 +158,7 @@ class IMDBTitleSearchDataTests(TestCase):
 
     def test_update_image_with_no_image_file_saved(self):
         try:
-            update_image_file(self.title_no_info, NON_EXISTENT_PATH)
+            update_image_file(self.title_no_info, NONEXISTENT_PATH)
         except Exception as e:
             print(f'exception: {e}')
             self.fail('update_image_file did not handle nonexistent path')

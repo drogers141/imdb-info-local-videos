@@ -1,0 +1,127 @@
+- model: imdb_info_local.imdbtitlesearchdata
+  pk: 2720
+  fields:
+    type: MO
+    title: A Girl Walks Home Alone At Night 2014
+    rating: 6.9/10
+    blurb: In the Iranian ghost-town Bad City, a place that reeks of death and loneliness,
+      the townspeople are unaware they are being stalked by a lonesome vampire.
+    image: title-images/tt2326554_pqprmQG.jpg
+    find_results: '<ul><li><a href="https://www.imdb.com/title/tt2326554/?ref_=fn_al_tt_1">A
+      Girl Walks Home Alone at Night (2014)</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt12717850/?ref_=fn_al_tt_2">A Girl
+      Walks Home Alone At Night (2014) (2020) (Podcast Episode)  - Season 2 | Episode
+      2  - Drinking and Screaming - A Horror Movie Review Podcast (2019) (Podcast
+      Series)</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt2062469/?ref_=fn_al_tt_3">A Girl Walks
+      Home Alone at Night (2011) (Short)</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt10173808/?ref_=fn_al_tt_4">A Girl
+      Walks Home Alone at Night (2019) (TV Episode)  - Season 4 | Episode 14  - The
+      Last Drive-In with Joe Bob Briggs (2018) (TV Series)</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt19828868/?ref_=fn_al_tt_5">A Girl
+      Walks Home Alone at Night (2021) (Podcast Episode) - The Next Reel Film Podcast
+      Master Feed (2011) (Podcast Series)</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt18761646/?ref_=fn_al_tt_6">188 A Girl
+      Walks Home Alone At Night (2014) (2021) (Podcast Episode) - Devils & Demons
+      - Der Horrorfilm-Podcast (2017) (Podcast Series)</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt16444164/?ref_=fn_al_tt_7">A Girl
+      Walks Home Alone At Night (2014) - Video Review (2016) (TV Episode) - Horrible
+      Reviews (2008) (TV Series)</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt9028870/?ref_=fn_al_tt_8">A Girl Walks
+      Home Alone at Night: Ana Lily Amirpour (2014) (TV Episode) - 10 Days of Different:
+      Sundance Film Festival (2013) (TV Series)</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt17032962/?ref_=fn_al_tt_9">Feminist
+      Movie Friday: A Girl Walks Home Alone at Night (2020) (Podcast Episode) - Stuff
+      Mom Never Told You (2009) (Podcast Series)</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt19458902/?ref_=fn_al_tt_10">PREVIEW
+      - Vampire Castle - Only Lovers Left Alive & A Girl Walks Home Alone At Night
+      (2021) (Podcast Episode) - The Antifada (2018) (Podcast Series)</a></li>
+
+      </ul>'
+    file_path: /Users/drogers/my-git/imdb-info-local-videos/imdb_info_local/tests/data/temp/movie-dir-1/A-Girl-Walks-Home-Alone-At-Night-2014
+    file_mtime: 1667876218
+    file_ctime: 1667876218
+- model: imdb_info_local.imdbtitlesearchdata
+  pk: 2721
+  fields:
+    type: MO
+    title: Absolutely Fabulous the Movie 2016
+    rating: 5.4/10
+    blurb: After attracting both media and police attention for accidentally knocking
+      Kate Moss into the River Thames, Edina and Patsy hide out in the south of France.
+    image: title-images/tt2112096_xEQ83SJ.jpg
+    find_results: '<ul><li><a href="https://www.imdb.com/title/tt2112096/?ref_=fn_al_tt_0">Absolutely
+      Fabulous: The Movie2016Jennifer Saunders, Joanna Lumley</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt22475296/?ref_=fn_al_tt_1">The Absolutely
+      Fabulous June Whitfield2022TV SpecialSarah Hadland, June Whitfield</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt0397106/?ref_=fn_al_tt_2">The Story
+      of Absolutely Fabulous2004TV MovieDawn French, Jane Horrocks</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt5544700/?ref_=fn_al_tt_3">Doraemon
+      the Movie: Nobita and the Birth of Japan2016Omar Cancedda, Yumi Kakazu</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt7048258/?ref_=fn_al_tt_4">Absolutely
+      Fabulous - The Movie2016S10.E68TV EpisodeZoom InTV Series</a></li>
+
+      </ul>'
+    file_path: /Users/drogers/my-git/imdb-info-local-videos/imdb_info_local/tests/data/temp/movie-dir-1/Absolutely-Fabulous-the-Movie-2016
+    file_mtime: 1667876218
+    file_ctime: 1667876218
+- model: imdb_info_local.imdbtitlesearchdata
+  pk: 2722
+  fields:
+    type: TV
+    title: Archer
+    rating: 8.6/10
+    blurb: Covert black ops and espionage take a back seat to zany personalities and
+      relationships between secret agents and drones.
+    image: title-images/tt1486217_R5lBHNc.jpg
+    find_results: '<ul><li><a href="https://www.imdb.com/title/tt1486217/?ref_=fn_al_tt_1">Archer
+      (2009) (TV Series)</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt0060490/?ref_=fn_al_tt_2">Harper (1966)
+      aka "Archer"</a></li>
+
+      </ul>'
+    file_path: /Users/drogers/my-git/imdb-info-local-videos/imdb_info_local/tests/data/temp/tv-dir-1/Archer
+    file_mtime: 1667876218
+    file_ctime: 1667876218
+- model: imdb_info_local.imdbtitlesearchdata
+  pk: 2723
+  fields:
+    type: TV
+    title: American Dad
+    rating: 7.4/10
+    blurb: The random escapades of Stan Smith, a conservative C.I.A. Agent dealing
+      with family life, and keeping America safe, all in the most absurd way possible.
+    image: title-images/tt0397306_sxOBgkr.jpg
+    find_results: '<ul><li><a href="https://www.imdb.com/title/tt0397306/?ref_=fn_al_tt_0">American
+      Dad!2005– TV SeriesSeth MacFarlane, Wendy Schaal</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt0455905/?ref_=fn_al_tt_1">American
+      Dad: The New CIA2005ShortSeth MacFarlane, Wendy Schaal</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt19846338/?ref_=fn_al_tt_2">iD Mobile
+      Sponsors Family Guy and American Dad TV Idents2022– TV Mini SeriesZain Qureshi</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt1621765/?ref_=fn_al_tt_3">American
+      Dad Season 4: Roger - Master of Disguise2009VideoMike Barker, Jim Feeley</a></li>
+
+      <li><a href="https://www.imdb.com/title/tt1047442/?ref_=fn_al_tt_4">An American
+      Dad Like No Other2007Video</a></li>
+
+      </ul>'
+    file_path: /Users/drogers/my-git/imdb-info-local-videos/imdb_info_local/tests/data/temp/tv-dir-1/American-Dad
+    file_mtime: 1667876218
+    file_ctime: 1667876218

@@ -12,6 +12,7 @@ ipython = "*"
 coverage = "*"
 pillow = "*"
 rich = "*"
+pyyaml = "*"
 
 [dev-packages]
 

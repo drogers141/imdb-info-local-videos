@@ -1,18 +1,22 @@
+import shutil
 from pathlib import Path
 from shutil import rmtree
-from unittest.mock import patch, call
+from unittest.mock import patch, call, Mock
+import os
 
 from django.test import TestCase, SimpleTestCase
 from django.core.management import call_command
 from django.conf import settings
 
 from imdb_info_local.imdb import IMDBTitleData, IMDBFindTitleResult
-from imdb_info_local.models import IMDBTitleSearchData, NON_EXISTENT_PATH
+from imdb_info_local.models import IMDBTitleSearchData, NONEXISTENT_PATH
 from imdb_info_local.management.commands.run_scraper import (
     IMDBTitleSearchResults, get_imdb_title_data, find_results_html,
     remove_title_data_for_deleted_files, process_directory
 )
-from .nondb_fixtures import archer_title_data, archer_find_title_result
+from .nondb_fixtures import (
+    archer_title_data, archer_find_title_result,
+)
 
 DATA_DIR = Path(__file__).parent.joinpath('data')
 
@@ -42,7 +46,7 @@ class RunScraperNoDBTests(SimpleTestCase):
         expected = IMDBTitleSearchResults(
             title='Unknown Title',
             find_results=[],
-            title_data=IMDBTitleData('N/A', 'No titles found in search', NON_EXISTENT_PATH)
+            title_data=IMDBTitleData('N/A', 'No titles found in search', NONEXISTENT_PATH)
         )
         actual = get_imdb_title_data('Unknown Title')
         self.assertEqual(expected.title, actual.title)
@@ -58,13 +62,18 @@ class RunScraperNoDBTests(SimpleTestCase):
     @patch('imdb_info_local.management.commands.run_scraper.process_directory')
     def test_command_call(self, process_directory_mock, remove_deleted_files_mock):
         """Ensure the commmand works"""
-        call_command('run_scraper')
-        self.assertSequenceEqual(remove_deleted_files_mock.call_args_list,
-                         [call(Path(settings.MOVIE_DIRECTORY), 'movie'),
-                          call(Path(settings.TV_DIRECTORY), 'tv'),])
-        self.assertSequenceEqual(process_directory_mock.call_args_list,
-                         [call(Path(settings.MOVIE_DIRECTORY), 'movie'),
-                          call(Path(settings.TV_DIRECTORY), 'tv'),])
+        video_dirs_settings = {
+            'TV': ['/path/to/tv'],
+            'Movies': ['/path/to/movies']
+        }
+        with self.settings(IMDB_INFO_LOCAL_VIDEO_DIRS=video_dirs_settings):
+            call_command('run_scraper')
+            self.assertSequenceEqual(remove_deleted_files_mock.call_args_list,
+                             [call(Path(settings.IMDB_INFO_LOCAL_VIDEO_DIRS['Movies'][0]), 'MO'),
+                              call(Path(settings.IMDB_INFO_LOCAL_VIDEO_DIRS['TV'][0]), 'TV')])
+            self.assertSequenceEqual(process_directory_mock.call_args_list,
+                                     [call(Path(settings.IMDB_INFO_LOCAL_VIDEO_DIRS['Movies'][0]), 'MO'),
+                                      call(Path(settings.IMDB_INFO_LOCAL_VIDEO_DIRS['TV'][0]), 'TV')])
 
 
 fleabag_search_results = [IMDBFindTitleResult(img_url='https://m.media-amazon.com/images/M/MV5BMjA4MzU5NzQxNV5BMl5BanBnXkFtZTgwOTg3MDA5NzM@._V1_UX32_CR0,0,32,44_AL_.jpg', title_url='https://www.imdb.com/title/tt5687612/', text='Fleabag (2016) (TV Series)'),
@@ -74,6 +83,8 @@ fleabag_search_results = [IMDBFindTitleResult(img_url='https://m.media-amazon.co
 
 class RunScraperTests(TestCase):
 
+    tv_dir = DATA_DIR.joinpath('tv')
+
     @classmethod
     def setUpTestData(cls):
         cls.archer = IMDBTitleSearchData.objects.create(
@@ -82,13 +93,12 @@ class RunScraperTests(TestCase):
             rating='8.6/10',
             blurb='Covert black ops and espionage take a back seat to zany personalities and relationships between secret agents and drones.',
             find_results='<ul><li><a href="https://www.imdb.com//title/tt1486217/">Archer (2009) (TV Series)</a></li>\n<li><a href="https://www.imdb.com//title/tt0060490/">Harper (1966) aka "Archer"</a></li>\n</ul>',
-            file_path='/Volumes/dr-wd-2/tv/Archer',
+            file_path=str((cls.tv_dir / 'Archer').resolve()),
             file_mtime=1604372147,
             file_ctime=1604372147
         )
 
     def setUp(self):
-        self.tv_dir = DATA_DIR.joinpath('tv')
         self.tv_dir.mkdir()
 
     def tearDown(self):
@@ -98,7 +108,8 @@ class RunScraperTests(TestCase):
         if movie_dir.is_dir():
             rmtree(movie_dir)
 
-    def test_process_dir_tv_title_already_exists(self):
+    @patch('imdb_info_local.management.commands.run_scraper.time.sleep')
+    def test_process_dir_tv_title_already_exists(self, time_sleep_mock):
         """Ensure title is not inserted if we have same title and type."""
         # This system expects unique titles for each type - movies and tv
         # ie there can't be two movies with the same title
@@ -107,13 +118,14 @@ class RunScraperTests(TestCase):
         # note this is overkill - as the year is expected, but what the hell
         archer_dir = self.tv_dir.joinpath('Archer')
         archer_dir.mkdir()
-        added = process_directory(self.tv_dir, 'tv')
+        added = process_directory(self.tv_dir, 'TV')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 1)
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer')[0], self.archer)
         self.assertSequenceEqual(added, [])
 
+    @patch('imdb_info_local.management.commands.run_scraper.time.sleep')
     @patch('imdb_info_local.management.commands.run_scraper.get_imdb_title_data')
-    def test_process_dir_tv_new_title(self, get_imdb_title_data_mock):
+    def test_process_dir_tv_new_title(self, get_imdb_title_data_mock, time_sleep_mock):
         get_imdb_title_data_mock.return_value = IMDBTitleSearchResults(
             title='Fleabag',
             find_results=fleabag_search_results,
@@ -126,7 +138,7 @@ class RunScraperTests(TestCase):
         fleabag_dir = self.tv_dir.joinpath('Fleabag')
         fleabag_dir.mkdir()
 
-        added = process_directory(self.tv_dir, 'tv')
+        added = process_directory(self.tv_dir, 'TV')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 2)
         fleabag = IMDBTitleSearchData.objects.get(title='Fleabag')
         self.assertEqual(fleabag.title, 'Fleabag')
@@ -134,8 +146,9 @@ class RunScraperTests(TestCase):
         self.assertEqual(fleabag.blurb, 'A comedy series adapted from the award-winning play about a young woman trying to cope with life in London whilst coming to terms with a recent tragedy.')
         self.assertSequenceEqual(added, ['Fleabag'])
 
+    @patch('imdb_info_local.management.commands.run_scraper.time.sleep')
     @patch('imdb_info_local.management.commands.run_scraper.get_imdb_title_data')
-    def test_process_dir_movie_where_title_exists_for_tv(self, get_imdb_title_data_mock):
+    def test_process_dir_movie_where_title_exists_for_tv(self, get_imdb_title_data_mock, time_sleep_mock):
         """Ensure we insert a movie if there is the same title tv show,
         but we do not insert a tv show if there is one with the same name
         """
@@ -158,7 +171,7 @@ class RunScraperTests(TestCase):
         archer_movie_dir = movie_dir.joinpath('Archer')
         archer_movie_dir.mkdir()
 
-        added = process_directory(movie_dir, 'movie')
+        added = process_directory(movie_dir, 'MO')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 2)
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer').count(), 2)
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer', type='TV').count(), 1)
@@ -171,7 +184,7 @@ class RunScraperTests(TestCase):
         fleabag_dir = self.tv_dir.joinpath('Fleabag')
         fleabag_dir.mkdir()
         # print(f"before delete check: {[t.title for t in IMDBTitleSearchData.objects.all()]}")
-        removed_titles = remove_title_data_for_deleted_files(self.tv_dir, 'tv')
+        removed_titles = remove_title_data_for_deleted_files(self.tv_dir, 'TV')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 1)
         self.assertEqual(IMDBTitleSearchData.objects.filter(title='Archer', type='TV').count(), 1)
         self.assertSequenceEqual(removed_titles, [])
@@ -179,6 +192,154 @@ class RunScraperTests(TestCase):
     def test_remove_title_data_for_deleted_files_removal_needed(self):
         fleabag_dir = self.tv_dir.joinpath('Fleabag')
         fleabag_dir.mkdir()
-        removed = remove_title_data_for_deleted_files(self.tv_dir, 'tv')
+        removed = remove_title_data_for_deleted_files(self.tv_dir, 'TV')
         self.assertEqual(IMDBTitleSearchData.objects.count(), 0)
         self.assertSequenceEqual(removed, ['Archer'])
+
+
+class MultipleDirectoriesTestNoDB(SimpleTestCase):
+    """Directory structure created for this test:
+
+├── movie-dir-1
+│   ├── A-Girl-Walks-Home-Alone-At-Night-2014
+│   └── Absolutely-Fabulous-the-Movie-2016
+├── tv-dir-1
+│   ├── American-Dad
+│   └── Archer
+└── tv-dir-2
+    ├── Avenue-5-2020
+    └── Awkwafina-Is-Nora-From-Queens
+    """
+
+    tempdir = DATA_DIR / 'temp'
+    tv_dir_1, tv_dir_2, movie_dir_1 = tempdir / 'tv-dir-1', tempdir / 'tv-dir-2', tempdir / 'movie-dir-1'
+    video_dirs_settings = {
+        'TV': [str(tv_dir_1), str(tv_dir_2)],
+        'Movies': [str(movie_dir_1)]
+    }
+    movie_dir_names = [
+        'A-Girl-Walks-Home-Alone-At-Night-2014',
+        'Absolutely-Fabulous-the-Movie-2016',
+    ]
+    tv_dir_names = [
+        'American-Dad',
+        'Archer',
+        'Avenue-5-2020',
+        'Awkwafina-Is-Nora-From-Queens',
+    ]
+
+    def setUp(self) -> None:
+        for dirpath in (self.tv_dir_1, self.tv_dir_2, self.movie_dir_1):
+            dirpath.mkdir(parents=True)
+        for name in self.tv_dir_names[:2]:
+            (self.tv_dir_1 / name).mkdir()
+        for name in self.tv_dir_names[2:]:
+            (self.tv_dir_2 / name).mkdir()
+        for name in self.movie_dir_names:
+            (self.movie_dir_1 / name).mkdir()
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tempdir)
+
+    @patch('imdb_info_local.management.commands.run_scraper.time.sleep')
+    @patch('imdb_info_local.management.commands.run_scraper.get_imdb_title_data')
+    @patch('imdb_info_local.management.commands.run_scraper.add_image_file')
+    @patch('imdb_info_local.management.commands.run_scraper.IMDBTitleSearchData')
+    def test_process_directory_w_multiple_titles(self, TitleSearchDataMock, add_image_file_mock, get_imdb_title_data_mock,
+               time_sleep_mock):
+        # os.system(f'find {self.tempdir} -print')
+        # os.system(f'tree {self.tempdir}')
+        with self.settings(IMDB_INFO_LOCAL_VIDEO_DIRS=self.video_dirs_settings):
+            # print(f'IMDB_INFO_LOCAL_VIDEO_DIRS:\n{settings.IMDB_INFO_LOCAL_VIDEO_DIRS}')
+            TitleSearchDataMock.mock_add_spec(IMDBTitleSearchData)
+            TitleSearchDataMock.objects.filter.return_value = False
+            added_titles = process_directory(self.movie_dir_1)
+            self.assertSequenceEqual(added_titles,
+                                     ['A Girl Walks Home Alone At Night 2014', 'Absolutely Fabulous the Movie 2016'])
+            # call_args will only contain the args from the last call of the mock
+            self.assert_(TitleSearchDataMock.call_args.kwargs['title'] == 'Absolutely Fabulous the Movie 2016')
+
+
+class MultipleDirectoriesTest(TestCase):
+    """Integration test - scrapes IMDB for 2 titles - so could fail due to network issues, etc.
+
+    Directory structure created for these tests:
+
+    ├── movie-dir-1
+    │   ├── A-Girl-Walks-Home-Alone-At-Night-2014
+    │   └── Absolutely-Fabulous-the-Movie-2016
+    ├── tv-dir-1
+    │   ├── American-Dad
+    │   └── Archer
+    └── tv-dir-2
+    ├── Avenue-5-2020
+    └── Awkwafina-Is-Nora-From-Queens
+    """
+    tempdir = DATA_DIR / 'temp'
+    tv_dir_1, tv_dir_2, movie_dir_1 = tempdir / 'tv-dir-1', tempdir / 'tv-dir-2', tempdir / 'movie-dir-1'
+    video_dirs_settings = {
+        'TV': [str(tv_dir_1), str(tv_dir_2)],
+        'Movies': [str(movie_dir_1)]
+    }
+    movie_dir_names = [
+        'A-Girl-Walks-Home-Alone-At-Night-2014',
+        'Absolutely-Fabulous-the-Movie-2016',
+    ]
+    tv_dir_names = [
+        'American-Dad',
+        'Archer',
+        'Avenue-5-2020',
+        'Awkwafina-Is-Nora-From-Queens',
+    ]
+    fixtures = ['imdb_info_local_one_tv_dir.yaml']
+
+    def setUp(self) -> None:
+        for dirpath in (self.tv_dir_1, self.tv_dir_2, self.movie_dir_1):
+            dirpath.mkdir(parents=True)
+        for name in self.tv_dir_names[:2]:
+            (self.tv_dir_1 / name).mkdir()
+        for name in self.tv_dir_names[2:]:
+            (self.tv_dir_2 / name).mkdir()
+        for name in self.movie_dir_names:
+            (self.movie_dir_1 / name).mkdir()
+
+    def tearDown(self) -> None:
+        shutil.rmtree(self.tempdir)
+
+    def test_run_scraper_adds_titles_correctly_from_one_dir_only(self):
+        """In a scenario where there are 2 tv directories with the titles from
+        one in the db and the other not in the db, add the correct titles to the db.
+        Also, don't remove any titles.  In this case there is a movie dir with titles
+        in the db as well."""
+        titles = [obj.title for obj in IMDBTitleSearchData.objects.all()]
+        self.assertSetEqual(
+            set(titles),
+            {'A Girl Walks Home Alone At Night 2014', 'Absolutely Fabulous the Movie 2016', 'American Dad', 'Archer'}
+        )
+        with self.settings(IMDB_INFO_LOCAL_VIDEO_DIRS=self.video_dirs_settings):
+            call_command('run_scraper')
+            titles = [obj.title for obj in IMDBTitleSearchData.objects.all()]
+            self.assertSetEqual(
+                set(titles),
+                {'A Girl Walks Home Alone At Night 2014', 'Absolutely Fabulous the Movie 2016', 'American Dad',
+                 'Archer', 'Avenue 5 2020', 'Awkwafina Is Nora From Queens'}
+            )
+
+    def test_run_scraper_does_not_remove_titles_when_dir_is_not_available(self):
+        """In a scenario where there is one tv dir with titles in the db but the dir does not
+        exist (e.g. a disk is not mounted), make sure titles in that dir are not deleted"""
+        titles = [obj.title for obj in IMDBTitleSearchData.objects.all()]
+        self.assertSetEqual(
+            set(titles),
+            {'A Girl Walks Home Alone At Night 2014', 'Absolutely Fabulous the Movie 2016', 'American Dad', 'Archer'}
+        )
+        shutil.rmtree(self.tv_dir_1)
+        shutil.rmtree(self.tv_dir_2)
+        with self.settings(IMDB_INFO_LOCAL_VIDEO_DIRS=self.video_dirs_settings):
+            call_command('run_scraper')
+            titles = [obj.title for obj in IMDBTitleSearchData.objects.all()]
+            self.assertSetEqual(
+                set(titles),
+                {'A Girl Walks Home Alone At Night 2014', 'Absolutely Fabulous the Movie 2016', 'American Dad',
+                 'Archer'}
+            )
