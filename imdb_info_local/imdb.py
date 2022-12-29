@@ -40,7 +40,7 @@ def imdb_title_search_results(title: str) -> [IMDBFindTitleResult]:
     titles = []
     if results_table:
         rows = results_table.find_all('tr')
-        logger.info(f'{title} - results table found -- {len(rows)} rows')
+        logger.info(f'  {title} - results table found -- {len(rows)} rows')
         for tr in rows:
             img_url = tr.td.img['src']
             relative_url = tr.find_all('td')[1].a['href']
@@ -62,7 +62,7 @@ def _title_search_results_alternate_html(title: str, section_soup) -> [IMDBFindT
     ul = section_soup.find('ul')
     if ul:
         li_tags = [tag for tag in ul.children if tag.name == 'li']
-        logger.info(f'{title} - results section found - {len(li_tags)} li_tags')
+        logger.info(f'  {title} - results section found - {len(li_tags)} li_tags')
         for li_tag in li_tags:
             img_url = _largest_image_from_img_tag(li_tag.find('img'))
             if not img_url:
