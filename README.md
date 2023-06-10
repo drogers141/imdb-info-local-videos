@@ -1,7 +1,7 @@
 # IMdb Info for Local Videos
 
 This is a website meant to work on a local machine where you have movies and tv series on disk or on 
-the computer and want IMdb ratings and summaries available for them.  It is implemented as a Django
+the computer and want IMDb ratings and summaries available for them.  It is implemented as a Django
 application, and is not secured for remote deployment.
 
 ## Storage of tracked videos
@@ -73,9 +73,9 @@ pipenv install
 There are scripts in the bin/ directory to run the scraper, the webserver, and clearing all data from
 the system, so add the bin/ directory to your PATH.
 
-Run the scraper or clear all data from scripts:
+Run the scraper (update) or clear all data from scripts:
 ```
-bin/imdb_info_local_run_scraper
+bin/imdb_info_local_update
 
 bin/imdb_info_local_clear_data
 ```
