@@ -11,7 +11,7 @@ archer_find_title_result = IMDBFindTitleResult(
 
 # goes with data/archer-title-page.html
 archer_title_data = IMDBTitleData(
-    rating='8.7/10',
+    rating=8.7,
     blurb='Covert black ops and espionage take a back seat to zany personalities and relationships between secret agents and drones.',
     image_file=Path('/tmp/archer.jpg')
 )

@@ -24,7 +24,7 @@ class IMDBTitleSearchData(models.Model):
     Most are obvious.
     type - either movie or tv series
     title - as described above
-    rating - imdb rating string - e.g. '7.5/10' - may be empty
+    rating - float rating from imdb - e.g. '7.5/10' rating -> 7.5
     blurb - descriptive blurb about the title - may be empty
     find_results - this is the list returned from the title search, saved as
         html (an unordered list).  This is kept in case the title
@@ -41,7 +41,7 @@ class IMDBTitleSearchData(models.Model):
     )
     type = models.CharField(max_length=2, choices=title_type_choices)
     title = models.CharField(max_length=512)
-    rating = models.CharField(max_length=32)
+    rating = models.FloatField(null=True)
     blurb = models.TextField()
     image = models.ImageField(upload_to=IMAGE_SUBDIRECTORY, blank=True)
     find_results = models.TextField()
@@ -56,7 +56,7 @@ class IMDBTitleSearchData(models.Model):
         return self.title
 
     def verbose_str(self):
-        return (f'{self.title}\nrating: {self.rating} - type: {self.type}\n{self.blurb}\n' +
+        return (f'{self.title}\nrating: {self.rating:.1f}/10 - type: {self.type}\n{self.blurb}\n' +
                 f'find_results:\n{self.find_results}')
 
 

@@ -29,7 +29,7 @@ class IMDBTitleSearchDataTests(TestCase):
 
         cls.movie = IMDBTitleSearchData.objects.create(
             title='The Corporation 2003',
-            rating='8.0/10',
+            rating=8.0,
             blurb='Documentary that looks at the concept of the corporation throughout recent history up to its present-day dominance.',
             image=corporation_image,
             type=IMDBTitleSearchData.MOVIE,
@@ -40,7 +40,7 @@ class IMDBTitleSearchDataTests(TestCase):
         )
         cls.tv = IMDBTitleSearchData.objects.create(
             title='Archer',
-            rating='8.6/10',
+            rating='8.6',
             blurb='Covert black ops and espionage take a back seat to zany personalities and relationships between secret agents and drones.',
             image=archer_image,
             type=IMDBTitleSearchData.TV,
@@ -51,7 +51,7 @@ class IMDBTitleSearchDataTests(TestCase):
         )
         cls.title_no_info = IMDBTitleSearchData.objects.create(
             title='Citizen Four Snowden Poitras',
-            rating='N/A',
+            rating=None,
             blurb='No title found in search',
             image=None,
             type=IMDBTitleSearchData.TV,
@@ -95,7 +95,7 @@ class IMDBTitleSearchDataTests(TestCase):
     @patch('imdb_info_local.views.imdb_title_data')
     def test_update_title_data(self, imdb_title_data_mock):
         imdb_title_data_mock.return_value = IMDBTitleData(
-            rating='6.5/10',
+            rating=6.5,
             blurb='Blurb for some alternate tv series or episode with a name like Archer.',
             image_file=Path('/tmp/archer.jpg')
         )
@@ -109,12 +109,12 @@ class IMDBTitleSearchDataTests(TestCase):
         response = self.client.post(reverse('title_update'),
                                     data=post_data,
                                     content_type='application/json')
-        partial_expected = b'{"rating": "6.5/10", "blurb": "Blurb for some alternate tv series or episode with a name like Archer.", "image-url": "/media/title-images/archer'
+        partial_expected = b'{"rating": 6.5, "blurb": "Blurb for some alternate tv series or episode with a name like Archer.", "image-url": "/media/title-images/archer'
         self.assert_(partial_expected in response.content)
 
         self.tv.refresh_from_db()
         self.assertEqual(self.tv.title, 'Archer')
-        self.assertEqual(self.tv.rating, '6.5/10')
+        self.assertEqual(self.tv.rating, 6.5)
         self.assertEqual(self.tv.blurb, 'Blurb for some alternate tv series or episode with a name like Archer.')
         self.assertEqual(self.tv.type, IMDBTitleSearchData.TV)
         self.assertEqual(self.tv.find_results, '<ul><li><a href="https://www.imdb.com//title/tt1486217/">Archer (2009) (TV Series)</a></li>\n<li><a href="https://www.imdb.com//title/tt0060490/">Harper (1966) aka "Archer"</a></li>\n</ul>')

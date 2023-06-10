@@ -85,12 +85,13 @@ def _title_url_from_li_tag(li_soup):
 
 @dataclass
 class IMDBTitleData:
-    rating: str
+    rating: float
     blurb: str
     image_file: Path
 
     def __str__(self):
-        return f'{self.rating}\n{self.blurb}'
+        rating_str = f'{self.rating:.1f}/10' if self.rating else 'N/A'
+        return f'{rating_str}\n{self.blurb}'
 
 
 def filename_stem_from_title_url(title_url: str) -> str:
@@ -108,7 +109,11 @@ def imdb_title_data(title_url: str) -> IMDBTitleData:
     """
     soup = parse_html_for_url(title_url)
     ratings_div = soup.find('div', attrs={'data-testid': "hero-rating-bar__aggregate-rating__score"})
-    rating = ratings_div.text if ratings_div else 'N/A'
+    # Note that we assign 0 here if there is no rating.  None works with sorting on the db model
+    # as well, however the value given to None shows as higher than numerical ratings.  This
+    # way the rating is lower.  Downstream we still render the rating as 'N/A' if it is 0, since
+    # IMDb doesn't allow 0 ratings.
+    rating = float(ratings_div.text.split('/')[0]) if ratings_div else 0
     plot_p = soup.find('span', attrs={'data-testid': 'plot-l'})
     if plot_p and plot_p.text:
         blurb = plot_p.text

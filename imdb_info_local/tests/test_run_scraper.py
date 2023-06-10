@@ -46,7 +46,7 @@ class RunScraperNoDBTests(SimpleTestCase):
         expected = IMDBTitleSearchResults(
             title='Unknown Title',
             find_results=[],
-            title_data=IMDBTitleData('N/A', 'No titles found in search', NONEXISTENT_PATH)
+            title_data=IMDBTitleData(None, 'No titles found in search', NONEXISTENT_PATH)
         )
         actual = get_imdb_title_data('Unknown Title')
         self.assertEqual(expected.title, actual.title)
@@ -90,7 +90,7 @@ class RunScraperTests(TestCase):
         cls.archer = IMDBTitleSearchData.objects.create(
             type='TV',
             title='Archer',
-            rating='8.6/10',
+            rating=8.6,
             blurb='Covert black ops and espionage take a back seat to zany personalities and relationships between secret agents and drones.',
             find_results='<ul><li><a href="https://www.imdb.com//title/tt1486217/">Archer (2009) (TV Series)</a></li>\n<li><a href="https://www.imdb.com//title/tt0060490/">Harper (1966) aka "Archer"</a></li>\n</ul>',
             file_path=str((cls.tv_dir / 'Archer').resolve()),
@@ -130,7 +130,7 @@ class RunScraperTests(TestCase):
             title='Fleabag',
             find_results=fleabag_search_results,
             title_data=IMDBTitleData(
-                rating='8.7/10',
+                rating=8.7,
                 blurb='A comedy series adapted from the award-winning play about a young woman trying to cope with life in London whilst coming to terms with a recent tragedy.',
                 image_file=Path('/tmp/archer.jpg')
             )
@@ -142,7 +142,7 @@ class RunScraperTests(TestCase):
         self.assertEqual(IMDBTitleSearchData.objects.count(), 2)
         fleabag = IMDBTitleSearchData.objects.get(title='Fleabag')
         self.assertEqual(fleabag.title, 'Fleabag')
-        self.assertEqual(fleabag.rating, '8.7/10')
+        self.assertEqual(fleabag.rating, 8.7)
         self.assertEqual(fleabag.blurb, 'A comedy series adapted from the award-winning play about a young woman trying to cope with life in London whilst coming to terms with a recent tragedy.')
         self.assertSequenceEqual(added, ['Fleabag'])
 
@@ -161,7 +161,7 @@ class RunScraperTests(TestCase):
             # doesn't matter - reuse these results - can't be empty
             find_results=fleabag_search_results,
             title_data=IMDBTitleData(
-                rating='8/10',
+                rating=8.0,
                 blurb='There should be an Archer movie anyway.',
                 image_file=Path('/tmp/archer.jpg')
             )

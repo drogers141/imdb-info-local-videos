@@ -20,7 +20,11 @@
                 {% endif %}
             </div>
             <div class="title-rating">
+              {% if title.rating %}
                 <p>{{ title.rating }} - {{ title.title }}</p>
+              {% else %}
+                <p>N/A - {{ title.title }}</p>
+              {% endif %}
             </div>
             <div class="blurb">
                 <p>{{ title.blurb|safe }}</p>

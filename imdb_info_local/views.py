@@ -39,6 +39,14 @@ class MtimeTitleListView(TitleListView):
             return IMDBTitleSearchData.objects.filter(type=IMDBTitleSearchData.TV).order_by('-file_mtime')
 
 
+class RatingsTitleListView(TitleListView):
+    def get_queryset(self):
+        if self.title_type == 'Movies':
+            return IMDBTitleSearchData.objects.filter(type=IMDBTitleSearchData.MOVIE).order_by('-rating')
+        elif self.title_type == 'TV':
+            return IMDBTitleSearchData.objects.filter(type=IMDBTitleSearchData.TV).order_by('-rating')
+
+
 def update_title_data(request):
     post_data = json.load(request)['post_data']
     title = post_data['title']
