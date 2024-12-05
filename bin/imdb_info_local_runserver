@@ -7,4 +7,5 @@ echo
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $(dirname "${SCRIPT_DIR}") || exit
 
+export PIPENV_IGNORE_VIRTUALENVS=1
 pipenv run python manage.py runserver 8002

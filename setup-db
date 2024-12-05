@@ -1,0 +1,8 @@
+postgres=# create database imdb_info_local
+postgres-# ;
+CREATE DATABASE
+postgres=# create user imdb_info_local_user with password 'imdb_info_local_pass123';
+CREATE ROLE
+postgres=# grant all privileges on database imdb_info_local to imdb_info_local_user;
+GRANT
+

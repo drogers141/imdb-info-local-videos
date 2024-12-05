@@ -6,4 +6,5 @@ echo 'use run_scraper -h for other usage'
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$(dirname "${SCRIPT_DIR}")" || exit
 pwd
+export PIPENV_IGNORE_VIRTUALENVS=1
 pipenv run python manage.py run_scraper "$@"
